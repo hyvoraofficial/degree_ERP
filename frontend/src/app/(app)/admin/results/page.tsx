@@ -105,7 +105,7 @@ export default function AdminResultsPage() {
     loadCourses();
   }, [selectedBranchId, toast]);
 
-  // 4. Load Results whenever selectedCourseId changes
+  // 4. Fetch Results when course selected
   const fetchResults = React.useCallback(async () => {
     if (!selectedBranchId || !selectedCourseId) {
       setResults([]);
@@ -114,8 +114,6 @@ export default function AdminResultsPage() {
     setIsLoadingResults(true);
 
     try {
-      // Mock / Seeded live result dataset for selected course & branch
-      const activeBranch = branches.find(b => b.id === selectedBranchId);
       const activeCourse = courses.find(c => c.id === selectedCourseId);
 
       const mockData: ExamResultRow[] = [
@@ -212,13 +210,13 @@ export default function AdminResultsPage() {
     } finally {
       setIsLoadingResults(false);
     }
-  }, [selectedBranchId, selectedCourseId, branches, courses, toast]);
+  }, [selectedBranchId, selectedCourseId, courses, toast]);
 
   React.useEffect(() => {
     fetchResults();
   }, [fetchResults]);
 
-  // Filters
+  // Filtered dataset
   const filteredResults = results.filter((r) => {
     const matchesSearch = 
       r.studentName.toLowerCase().includes(search.toLowerCase()) ||
@@ -246,27 +244,37 @@ export default function AdminResultsPage() {
   return (
     <div className="space-y-6 select-none pb-12">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-3xl shadow-xs">
+      <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
+            <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
               Examination & Course Results
             </h1>
-            <p className="text-xs font-medium text-slate-600 dark:text-zinc-400 mt-0.5">
+            <p className="text-xs font-semibold text-slate-500 mt-0.5">
               Review student academic performance, grade transcripts, and pass rates by branch & course.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" size="sm" onClick={() => fetchResults()} className="gap-2 cursor-pointer">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => fetchResults()} 
+            className="gap-2 cursor-pointer border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+          >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoadingResults ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 cursor-pointer">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => window.print()} 
+            className="gap-2 cursor-pointer border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+          >
             <Printer className="w-3.5 h-3.5" />
             Print Report
           </Button>
@@ -274,17 +282,17 @@ export default function AdminResultsPage() {
       </div>
 
       {/* Selection Control Panel (Branch & Course Stepper) */}
-      <Card className="p-6 space-y-4 bg-slate-50/60 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-3">
+      <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+            <Filter className="w-4 h-4 text-primary" />
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
               Selection Controls
             </h2>
           </div>
           {isAllBranchesSelected && (
-            <Badge variant="outline" className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900">
-              Header Set to All Branches — Select Branch First
+            <Badge variant="outline" className="text-[10px] font-bold text-amber-700 bg-amber-50 border-amber-200 px-2.5 py-0.5">
+              Header Set to All Branches — Select Branch Below First
             </Badge>
           )}
         </div>
@@ -292,14 +300,14 @@ export default function AdminResultsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Step 1: Branch Selection */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+            <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
               1. Select Branch *
             </label>
             <select
               value={selectedBranchId}
               onChange={(e) => setSelectedBranchId(e.target.value)}
-              className="h-11 w-full rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
+              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-xs"
               disabled={isLoadingBranches}
             >
               <option value="">-- Choose Branch --</option>
@@ -310,7 +318,7 @@ export default function AdminResultsPage() {
               ))}
             </select>
             {!selectedBranchId && (
-              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1 mt-0.5">
+              <span className="text-[11px] text-amber-700 font-semibold flex items-center gap-1 mt-0.5">
                 <AlertCircle className="w-3 h-3" /> Please select a Branch to view its registered courses.
               </span>
             )}
@@ -318,14 +326,14 @@ export default function AdminResultsPage() {
 
           {/* Step 2: Course Selection */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+            <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-primary" />
               2. Select Course *
             </label>
             <select
               value={selectedCourseId}
               onChange={(e) => setSelectedCourseId(e.target.value)}
-              className="h-11 w-full rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!selectedBranchId || isLoadingCourses}
             >
               <option value="">
@@ -342,70 +350,70 @@ export default function AdminResultsPage() {
               ))}
             </select>
             {selectedBranchId && !selectedCourseId && (
-              <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1 mt-0.5">
+              <span className="text-[11px] text-primary font-semibold flex items-center gap-1 mt-0.5">
                 <AlertCircle className="w-3 h-3" /> Select a Course from the dropdown above to load results.
               </span>
             )}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Main Results Table and Stats */}
       {selectedBranchId && selectedCourseId ? (
         <>
           {/* Summary Metric Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="p-4 flex items-center gap-3 border-slate-200 dark:border-zinc-800">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                 <User className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-zinc-400">Total Enrolled</p>
-                <p className="text-lg font-black text-slate-900 dark:text-slate-50">{totalStudents}</p>
+                <p className="text-[10px] font-extrabold uppercase text-slate-500">Total Enrolled</p>
+                <p className="text-xl font-black text-slate-900">{totalStudents}</p>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4 flex items-center gap-3 border-slate-200 dark:border-zinc-800">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-zinc-400">Pass Rate</p>
-                <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">{passRate}%</p>
+                <p className="text-[10px] font-extrabold uppercase text-slate-500">Pass Rate</p>
+                <p className="text-xl font-black text-emerald-600">{passRate}%</p>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4 flex items-center gap-3 border-slate-200 dark:border-zinc-800">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-zinc-400">Class Average</p>
-                <p className="text-lg font-black text-slate-900 dark:text-slate-50">{averagePercentage}%</p>
+                <p className="text-[10px] font-extrabold uppercase text-slate-500">Class Average</p>
+                <p className="text-xl font-black text-slate-900">{averagePercentage}%</p>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4 flex items-center gap-3 border-slate-200 dark:border-zinc-800">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+            <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-zinc-400">Top Score</p>
-                <p className="text-lg font-black text-purple-600 dark:text-purple-400">{highestMark} / 100</p>
+                <p className="text-[10px] font-extrabold uppercase text-slate-500">Top Score</p>
+                <p className="text-xl font-black text-purple-600">{highestMark} / 100</p>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Table Filters & Toolbar */}
-          <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-slate-200 dark:border-zinc-800">
+          <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search student or subject..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -415,8 +423,8 @@ export default function AdminResultsPage() {
                 onClick={() => setStatusFilter('ALL')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === 'ALL'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-300'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 All ({results.length})
@@ -426,7 +434,7 @@ export default function AdminResultsPage() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === 'PASS'
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-300'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 Passed ({results.filter(r => r.status === 'pass').length})
@@ -436,20 +444,20 @@ export default function AdminResultsPage() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === 'FAIL'
                     ? 'bg-rose-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-300'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 Failed ({results.filter(r => r.status === 'fail').length})
               </button>
             </div>
-          </Card>
+          </div>
 
           {/* Results Table */}
-          <Card className="overflow-hidden border-slate-200 dark:border-zinc-800 shadow-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-slate-100/80 dark:bg-zinc-800/60 border-b border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-extrabold uppercase tracking-wider">
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[11px]">
                     <th className="py-3.5 px-4">Student</th>
                     <th className="py-3.5 px-4">Admission / Roll</th>
                     <th className="py-3.5 px-4">Exam & Subject</th>
@@ -460,70 +468,70 @@ export default function AdminResultsPage() {
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-zinc-800 font-medium">
+                <tbody className="divide-y divide-slate-100 font-medium">
                   {filteredResults.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-500 dark:text-zinc-400">
+                      <td colSpan={8} className="py-12 text-center text-slate-500">
                         <div className="flex flex-col items-center gap-2">
-                          <Award className="w-8 h-8 text-slate-300 dark:text-zinc-600" />
-                          <p className="font-bold text-sm">No exam result records found.</p>
-                          <p className="text-xs text-slate-400">Try adjusting your search query or status filter.</p>
+                          <Award className="w-8 h-8 text-slate-300" />
+                          <p className="font-bold text-sm text-slate-700">No exam result records found.</p>
+                          <p className="text-xs text-slate-500">Try adjusting your search query or status filter.</p>
                         </div>
                       </td>
                     </tr>
                   ) : (
                     filteredResults.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 transition-colors">
+                      <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs shrink-0 border border-indigo-200 dark:border-indigo-800">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs shrink-0 border border-primary/20">
                               {r.studentName.charAt(0)}
                             </div>
                             <div className="flex flex-col">
-                              <span className="font-bold text-slate-900 dark:text-slate-100">{r.studentName}</span>
+                              <span className="font-bold text-slate-900">{r.studentName}</span>
                               <span className="text-[10px] text-slate-500">{r.courseName}</span>
                             </div>
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex flex-col font-mono text-[11px]">
-                            <span className="font-bold text-slate-800 dark:text-slate-200">{r.admissionNumber}</span>
+                            <span className="font-bold text-slate-800">{r.admissionNumber}</span>
                             <span className="text-[10px] text-slate-500">Roll: {r.rollNumber}</span>
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex flex-col">
-                            <span className="font-bold text-slate-900 dark:text-slate-100">{r.subjectName}</span>
-                            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">{r.examTitle}</span>
+                            <span className="font-bold text-slate-900">{r.subjectName}</span>
+                            <span className="text-[10px] text-primary font-semibold">{r.examTitle}</span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-slate-600 dark:text-zinc-400">
+                        <td className="py-3.5 px-4 font-semibold text-slate-700">
                           {r.batchName}
                         </td>
                         <td className="py-3.5 px-4 text-center font-bold">
-                          <span className="text-slate-900 dark:text-slate-100">{r.marksObtained}</span>
+                          <span className="text-slate-900">{r.marksObtained}</span>
                           <span className="text-slate-400 text-[10px]"> / {r.maxMarks}</span>
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black ${
                             r.grade === 'A+' || r.grade === 'A'
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                              ? 'bg-emerald-100 text-emerald-800'
                               : r.grade === 'B' || r.grade === 'C'
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400'
-                              : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-rose-100 text-rose-800'
                           }`}>
                             {r.grade}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           {r.status === 'pass' ? (
-                            <Badge variant="success" className="gap-1 px-2.5 py-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               <CheckCircle2 className="w-3 h-3" /> Passed
-                            </Badge>
+                            </span>
                           ) : (
-                            <Badge variant="error" className="gap-1 px-2.5 py-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                               <XCircle className="w-3 h-3" /> Failed
-                            </Badge>
+                            </span>
                           )}
                         </td>
                         <td className="py-3.5 px-4 text-right">
@@ -531,7 +539,7 @@ export default function AdminResultsPage() {
                             variant="outline" 
                             size="sm"
                             onClick={() => setSelectedResult(r)}
-                            className="h-8 text-[11px] gap-1 cursor-pointer"
+                            className="h-8 text-[11px] gap-1 cursor-pointer border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
                           >
                             <FileText className="w-3 h-3" /> View Transcript
                           </Button>
@@ -542,79 +550,79 @@ export default function AdminResultsPage() {
                 </tbody>
               </table>
             </div>
-          </Card>
+          </div>
         </>
       ) : (
         /* Prompt when Branch or Course not selected */
-        <Card className="p-12 text-center flex flex-col items-center justify-center gap-4 bg-slate-50/50 border-dashed border-2 border-slate-300 dark:border-zinc-800">
-          <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+        <div className="bg-white border-2 border-dashed border-slate-200 p-12 rounded-2xl text-center flex flex-col items-center justify-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
             <Layers className="w-8 h-8" />
           </div>
           <div className="max-w-md space-y-1">
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-extrabold text-slate-900">
               {!selectedBranchId ? 'Select a Branch to Begin' : 'Select a Course'}
             </h3>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
+            <p className="text-xs text-slate-500">
               {!selectedBranchId
                 ? 'Please select a Branch from the control panel above to view courses offered at that campus.'
                 : 'Choose a Course from the dropdown menu to inspect student examination scorecards and grades.'}
             </p>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Result Details Modal */}
       {selectedResult && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl animate-fade-in">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">Official Academic Transcript</h3>
+                  <h3 className="font-extrabold text-slate-900 text-sm">Official Academic Transcript</h3>
                   <p className="text-[11px] text-slate-500">{selectedResult.examTitle}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setSelectedResult(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="bg-slate-50 dark:bg-zinc-800/50 p-4 rounded-2xl space-y-2 border border-slate-200 dark:border-zinc-800">
+              <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Student Name:</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">{selectedResult.studentName}</span>
+                  <span className="font-bold text-slate-900">{selectedResult.studentName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Admission Number:</span>
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{selectedResult.admissionNumber}</span>
+                  <span className="font-mono font-bold text-slate-800">{selectedResult.admissionNumber}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Course & Batch:</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedResult.courseName} ({selectedResult.batchName})</span>
+                  <span className="font-semibold text-slate-800">{selectedResult.courseName} ({selectedResult.batchName})</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Subject:</span>
-                  <span className="font-bold text-indigo-600 dark:text-indigo-400">{selectedResult.subjectName}</span>
+                  <span className="font-bold text-primary">{selectedResult.subjectName}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 bg-slate-100 dark:bg-zinc-800 rounded-xl">
+                <div className="p-3 bg-slate-100 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-bold block">Marks</span>
-                  <span className="text-sm font-black text-slate-900 dark:text-slate-100">{selectedResult.marksObtained} / {selectedResult.maxMarks}</span>
+                  <span className="text-sm font-black text-slate-900">{selectedResult.marksObtained} / {selectedResult.maxMarks}</span>
                 </div>
-                <div className="p-3 bg-slate-100 dark:bg-zinc-800 rounded-xl">
+                <div className="p-3 bg-slate-100 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-bold block">Grade</span>
-                  <span className="text-sm font-black text-indigo-600 dark:text-indigo-400">{selectedResult.grade}</span>
+                  <span className="text-sm font-black text-primary">{selectedResult.grade}</span>
                 </div>
-                <div className="p-3 bg-slate-100 dark:bg-zinc-800 rounded-xl">
+                <div className="p-3 bg-slate-100 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-bold block">Status</span>
                   <span className={`text-xs font-black uppercase ${selectedResult.status === 'pass' ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {selectedResult.status}
@@ -623,15 +631,15 @@ export default function AdminResultsPage() {
               </div>
 
               {selectedResult.remarks && (
-                <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900 rounded-xl">
-                  <span className="text-[10px] font-extrabold uppercase text-indigo-600 block mb-1">Faculty Remarks</span>
-                  <p className="text-slate-700 dark:text-zinc-300 italic">{selectedResult.remarks}</p>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                  <span className="text-[10px] font-extrabold uppercase text-slate-600 block mb-1">Faculty Remarks</span>
+                  <p className="text-slate-700 italic">{selectedResult.remarks}</p>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="sm" onClick={() => setSelectedResult(null)} className="cursor-pointer">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <Button variant="outline" size="sm" onClick={() => setSelectedResult(null)} className="cursor-pointer border-slate-200 text-slate-700">
                 Close
               </Button>
               <Button size="sm" onClick={() => window.print()} className="gap-2 cursor-pointer">
