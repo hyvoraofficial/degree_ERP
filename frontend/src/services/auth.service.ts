@@ -17,12 +17,16 @@ function getSubdomain(): string {
     if (parts.length > 1 && !parts[0].startsWith('localhost')) {
       return parts[0];
     }
+  } else if (hostname.includes('vercel.app') || hostname.includes('onrender.com')) {
+    if (parts.length > 3) {
+      return parts[0];
+    }
   } else {
     if (parts.length > 2) {
       return parts[0];
     }
   }
-  return 'hyvora'; // Default local fallback
+  return 'hyvora'; // Default fallback
 }
 
 export const authService = {

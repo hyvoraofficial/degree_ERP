@@ -37,12 +37,16 @@ export class TenantGuard implements CanActivate {
     }
 
     // Fetch matching Academy to assert presence and check status
-    const academy = await this.prisma.academy.findUnique({
+    let academy = await this.prisma.academy.findUnique({
       where: { subdomain },
-      include: {
-        // Option to pre-fetch branding settings if needed
-      }
     });
+
+    // Fallback: If tenant subdomain is not found, fallback to primary default active tenant ('hyvora' or first active academy)
+    if (!academy) {
+      academy = await this.prisma.academy.findFirst({
+        where: { status: 'active', deletedAt: null },
+      });
+    }
 
     if (!academy) {
       throw new NotFoundException(`Academy tenant with subdomain "${subdomain}" not registered on HYVORA.`);
