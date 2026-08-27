@@ -19,7 +19,7 @@ import { API_BASE_URL, getSubdomain, getAuthToken } from '@/config/api.config';
 
 import { assignmentService, AssignmentItem } from '@/services/assignment.service';
 
-type PortalTab = 'DASHBOARD' | 'PROFILE' | 'CURRICULUM' | 'BATCH' | 'ATTENDANCE' | 'FEES' | 'MATERIALS' | 'ASSIGNMENTS' | 'ANNOUNCEMENTS';
+type PortalTab = 'DASHBOARD' | 'PROFILE' | 'CURRICULUM' | 'BATCH' | 'ATTENDANCE' | 'FEES' | 'MATERIALS' | 'ASSIGNMENTS' | 'ANNOUNCEMENTS' | 'RESULTS';
 
 export default function StudentDashboard() {
   const { toast } = useToast();
@@ -35,6 +35,7 @@ export default function StudentDashboard() {
     else if (pathname.includes('/materials') || pathname.includes('/videos')) setActiveTab('MATERIALS');
     else if (pathname.includes('/assignments')) setActiveTab('ASSIGNMENTS');
     else if (pathname.includes('/fees') || pathname.includes('/payments')) setActiveTab('FEES');
+    else if (pathname.includes('/results')) setActiveTab('RESULTS');
     else if (pathname.includes('/notifications')) setActiveTab('ANNOUNCEMENTS');
     else if (pathname.includes('/profile') || pathname.includes('/settings')) setActiveTab('PROFILE');
     else setActiveTab('DASHBOARD');
@@ -682,6 +683,120 @@ export default function StudentDashboard() {
               <p className="text-xs text-zinc-600 dark:text-zinc-400">
                 The monthly JEE preparatory mock test is scheduled for next Saturday. Reporting time is 09:00 AM sharp at the Electronic City branch.
               </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* SECTION 9: STUDENT SUBJECT RESULTS */}
+      {activeTab === 'RESULTS' && (
+        <Card className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+            <div>
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">My Subject Examination Results</h3>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Official grade report card for <strong className="text-zinc-700 dark:text-zinc-200">{user ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Student'}</strong> across your enrolled course subjects.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 h-9 text-xs">
+              <Download className="w-3.5 h-3.5" /> Download Report Card PDF
+            </Button>
+          </div>
+
+          {/* Student Overview Metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-indigo-50/40 dark:bg-indigo-950/20">
+              <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider block">Cumulative GPA</span>
+              <span className="text-xl font-black text-indigo-600">3.88 / 4.0</span>
+            </div>
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-emerald-50/40 dark:bg-emerald-950/20">
+              <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider block">Pass Status</span>
+              <span className="text-xl font-black text-emerald-600">Qualified</span>
+            </div>
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-blue-50/40 dark:bg-blue-950/20">
+              <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block">Overall Percentage</span>
+              <span className="text-xl font-black text-blue-600">89.6 %</span>
+            </div>
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-purple-50/40 dark:bg-purple-950/20">
+              <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-wider block">Class Rank</span>
+              <span className="text-xl font-black text-purple-600">Rank # 1</span>
+            </div>
+          </div>
+
+          {/* Subject-Wise Results Table */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-zinc-500">Enrolled Subjects Scorecard</h4>
+            
+            <div className="overflow-x-auto border border-border rounded-2xl">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100/80 dark:bg-zinc-800/60 border-b border-border text-zinc-700 dark:text-zinc-300 font-extrabold uppercase tracking-wider">
+                    <th className="py-3.5 px-4">Subject Name</th>
+                    <th className="py-3.5 px-4">Exam Assessment</th>
+                    <th className="py-3.5 px-4 text-center">Marks Obtained</th>
+                    <th className="py-3.5 px-4 text-center">Max Marks</th>
+                    <th className="py-3.5 px-4 text-center">Percentage</th>
+                    <th className="py-3.5 px-4 text-center">Grade</th>
+                    <th className="py-3.5 px-4 text-center">Result</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border font-medium">
+                  <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                    <td className="py-3.5 px-4 font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-indigo-500" />
+                      Advanced Mathematics
+                    </td>
+                    <td className="py-3.5 px-4 text-zinc-700 dark:text-zinc-300 font-semibold">Mid-Term STEM Assessment</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-zinc-900 dark:text-zinc-100">95.0</td>
+                    <td className="py-3.5 px-4 text-center text-zinc-400">100</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-emerald-600">95.0%</td>
+                    <td className="py-3.5 px-4 text-center"><span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-black text-[11px]">A+</span></td>
+                    <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                    <td className="py-3.5 px-4 font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-indigo-500" />
+                      Classical Physics
+                    </td>
+                    <td className="py-3.5 px-4 text-zinc-700 dark:text-zinc-300 font-semibold">Mid-Term STEM Assessment</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-zinc-900 dark:text-zinc-100">84.5</td>
+                    <td className="py-3.5 px-4 text-center text-zinc-400">100</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-emerald-600">84.5%</td>
+                    <td className="py-3.5 px-4 text-center"><span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-black text-[11px]">A</span></td>
+                    <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                    <td className="py-3.5 px-4 font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-indigo-500" />
+                      Computer Science & Logic
+                    </td>
+                    <td className="py-3.5 px-4 text-zinc-700 dark:text-zinc-300 font-semibold">Mid-Term STEM Assessment</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-zinc-900 dark:text-zinc-100">91.0</td>
+                    <td className="py-3.5 px-4 text-center text-zinc-400">100</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-emerald-600">91.0%</td>
+                    <td className="py-3.5 px-4 text-center"><span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-black text-[11px]">A+</span></td>
+                    <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                    <td className="py-3.5 px-4 font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-indigo-500" />
+                      Chemistry & Laboratory Studies
+                    </td>
+                    <td className="py-3.5 px-4 text-zinc-700 dark:text-zinc-300 font-semibold">Mid-Term STEM Assessment</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-zinc-900 dark:text-zinc-100">88.0</td>
+                    <td className="py-3.5 px-4 text-center text-zinc-400">100</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-emerald-600">88.0%</td>
+                    <td className="py-3.5 px-4 text-center"><span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-black text-[11px]">A</span></td>
+                    <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </Card>

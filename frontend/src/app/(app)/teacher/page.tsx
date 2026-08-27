@@ -20,7 +20,7 @@ import { lmsService, StudyMaterialItem } from '@/services/lms.service';
 import { assignmentService, AssignmentItem } from '@/services/assignment.service';
 import { API_BASE_URL, getSubdomain } from '@/config/api.config';
 
-type TeacherTab = 'DASHBOARD' | 'PROFILE' | 'ATTENDANCE' | 'STUDENTS' | 'MATERIALS' | 'ASSIGNMENTS' | 'VIDEOS' | 'EXAMS';
+type TeacherTab = 'DASHBOARD' | 'PROFILE' | 'ATTENDANCE' | 'STUDENTS' | 'MATERIALS' | 'ASSIGNMENTS' | 'VIDEOS' | 'EXAMS' | 'RESULTS';
 
 export default function TeacherDashboard() {
   const { toast } = useToast();
@@ -36,6 +36,7 @@ export default function TeacherDashboard() {
     else if (pathname.includes('/materials')) setActiveTab('MATERIALS');
     else if (pathname.includes('/videos')) setActiveTab('VIDEOS');
     else if (pathname.includes('/exams')) setActiveTab('EXAMS');
+    else if (pathname.includes('/results')) setActiveTab('RESULTS');
     else if (pathname.includes('/profile')) setActiveTab('PROFILE');
     else setActiveTab('DASHBOARD');
   }, [pathname]);
@@ -1441,6 +1442,109 @@ export default function TeacherDashboard() {
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Pending Marks Entry</span>
               <span className="text-2xl font-black text-amber-500">1 Paper</span>
             </div>
+          </div>
+        </Card>
+      )}
+
+      {/* SECTION 9: TEACHER COURSE RESULTS */}
+      {activeTab === 'RESULTS' && (
+        <Card className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+            <div>
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Course Student Results</h3>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">View examination results and scorecards for all students enrolled in your assigned course.</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-zinc-400">Assigned Course:</span>
+              <select className="h-10 px-3 rounded-xl border border-border bg-background text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                <option value="c1">Grade 10 - Advanced Mathematics</option>
+                <option value="c2">Grade 11 - Classical Physics</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-slate-50/50 dark:bg-zinc-800/40">
+              <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider block">Course Enrolled Students</span>
+              <span className="text-xl font-black text-zinc-900 dark:text-zinc-50">5 Students</span>
+            </div>
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-emerald-50/30 dark:bg-emerald-950/20">
+              <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider block">Pass Rate</span>
+              <span className="text-xl font-black text-emerald-600">80.0 %</span>
+            </div>
+            <div className="p-4 border border-border rounded-xl space-y-1 bg-blue-50/30 dark:bg-blue-950/20">
+              <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block">Course Average Marks</span>
+              <span className="text-xl font-black text-blue-600">77.7 / 100</span>
+            </div>
+          </div>
+
+          {/* Results Table */}
+          <div className="overflow-x-auto border border-border rounded-2xl">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100/80 dark:bg-zinc-800/60 border-b border-border text-zinc-700 dark:text-zinc-300 font-extrabold uppercase tracking-wider">
+                  <th className="py-3 px-4">Student Name</th>
+                  <th className="py-3 px-4">Admission No</th>
+                  <th className="py-3 px-4">Roll No</th>
+                  <th className="py-3 px-4">Subject</th>
+                  <th className="py-3 px-4 text-center">Marks</th>
+                  <th className="py-3 px-4 text-center">Grade</th>
+                  <th className="py-3 px-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border font-medium">
+                <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                  <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100">Priya Nair</td>
+                  <td className="py-3.5 px-4 font-mono">HYV-2026-0002</td>
+                  <td className="py-3.5 px-4 font-mono">10A-02</td>
+                  <td className="py-3.5 px-4 text-indigo-600 font-semibold">Advanced Mathematics</td>
+                  <td className="py-3.5 px-4 text-center font-bold">95.0 / 100</td>
+                  <td className="py-3.5 px-4 text-center"><span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black">A+</span></td>
+                  <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                </tr>
+                <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                  <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100">Rohan Sharma</td>
+                  <td className="py-3.5 px-4 font-mono">HYV-2026-0003</td>
+                  <td className="py-3.5 px-4 font-mono">10A-03</td>
+                  <td className="py-3.5 px-4 text-indigo-600 font-semibold">Advanced Mathematics</td>
+                  <td className="py-3.5 px-4 text-center font-bold">84.5 / 100</td>
+                  <td className="py-3.5 px-4 text-center"><span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black">A</span></td>
+                  <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                </tr>
+                <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                  <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100">Sneha Patel</td>
+                  <td className="py-3.5 px-4 font-mono">HYV-2026-0006</td>
+                  <td className="py-3.5 px-4 font-mono">10A-06</td>
+                  <td className="py-3.5 px-4 text-indigo-600 font-semibold">Advanced Mathematics</td>
+                  <td className="py-3.5 px-4 text-center font-bold">89.0 / 100</td>
+                  <td className="py-3.5 px-4 text-center"><span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black">A</span></td>
+                  <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                </tr>
+                <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                  <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100">Devendra Verma</td>
+                  <td className="py-3.5 px-4 font-mono">HYV-2026-0004</td>
+                  <td className="py-3.5 px-4 font-mono">10A-04</td>
+                  <td className="py-3.5 px-4 text-indigo-600 font-semibold">Advanced Mathematics</td>
+                  <td className="py-3.5 px-4 text-center font-bold">78.0 / 100</td>
+                  <td className="py-3.5 px-4 text-center"><span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black">B</span></td>
+                  <td className="py-3.5 px-4 text-center"><Badge variant="success">Passed</Badge></td>
+                </tr>
+                <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40">
+                  <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100">Kiran Reddy</td>
+                  <td className="py-3.5 px-4 font-mono">HYV-2026-0005</td>
+                  <td className="py-3.5 px-4 font-mono">10A-05</td>
+                  <td className="py-3.5 px-4 text-indigo-600 font-semibold">Advanced Mathematics</td>
+                  <td className="py-3.5 px-4 text-center font-bold">42.0 / 100</td>
+                  <td className="py-3.5 px-4 text-center"><span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black">F</span></td>
+                  <td className="py-3.5 px-4 text-center"><Badge variant="error">Failed</Badge></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </Card>
       )}
