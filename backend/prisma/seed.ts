@@ -161,7 +161,7 @@ async function main() {
   }
 
   // 7. Primary Admin Account Creation (Only Admin account seeded for production management)
-  const hashedPassword = await bcrypt.hash('AdminPassword123!', 12);
+  const hashedPassword = await bcrypt.hash('admin', 10);
   const adminUserId = '11111111-1111-1111-1111-111111111111';
 
   await prisma.user.upsert({
