@@ -16,27 +16,6 @@ export const MOCK_ACADEMY = {
 // 2. Mock Students
 export const MOCK_STUDENTS: StudentWithUser[] = [
   {
-    id: 's1111111-1111-1111-1111-111111111111',
-    academyId: 'a1111111-1111-1111-1111-111111111111',
-    userId: 'u4444444-4444-4444-4444-444444444444',
-    admissionNumber: 'HYV-2026-0001',
-    admissionDate: '2026-03-10',
-    dateOfBirth: '2010-05-15',
-    gender: 'male',
-    bloodGroup: 'O+',
-    parentName: 'Rajesh Mehta',
-    parentPhone: '+91-9876543211',
-    parentEmail: 'rajesh.mehta@gmail.com',
-    firstName: 'Arjun',
-    lastName: 'Mehta',
-    email: 'arjun@hyvora.com',
-    phone: '+91-9999999904',
-    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=100&q=80',
-    status: 'active',
-    createdAt: '2026-03-10T10:00:00Z',
-    updatedAt: '2026-03-10T10:00:00Z'
-  },
-  {
     id: 's2222222-2222-2222-2222-222222222222',
     academyId: 'a1111111-1111-1111-1111-111111111111',
     userId: 'u5555555-5555-5555-5555-555555555555',
@@ -78,24 +57,6 @@ export const MOCK_TEACHERS: TeacherWithUser[] = [
     status: 'active',
     createdAt: '2024-06-01T09:00:00Z',
     updatedAt: '2024-06-01T09:00:00Z'
-  },
-  {
-    id: 't2222222-2222-2222-2222-222222222222',
-    academyId: 'a1111111-1111-1111-1111-111111111111',
-    userId: 'u3333333-3333-3333-3333-333333333333',
-    employeeId: 'EMP-HYV-102',
-    specialization: ['Computer Science', 'Mathematics'],
-    qualification: 'MCA, M.Tech in CS',
-    joiningDate: '2024-08-15',
-    salary: 80000.00,
-    firstName: 'Sunita',
-    lastName: 'Sharma',
-    email: 'sunita@hyvora.com',
-    phone: '+91-9999999903',
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80',
-    status: 'active',
-    createdAt: '2024-08-15T10:00:00Z',
-    updatedAt: '2024-08-15T10:00:00Z'
   }
 ];
 
