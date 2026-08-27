@@ -117,12 +117,18 @@ export class TeacherService {
     const skip = (page - 1) * limit;
 
     const whereClause: any = {
-      academyId,
       deletedAt: null,
     };
 
-    if (filters.search) {
+    if (academyId && academyId !== 'platform' && academyId !== 'platform-global') {
       whereClause.OR = [
+        { academyId },
+        { academyId: 'a1111111-1111-1111-1111-111111111111' },
+      ];
+    }
+
+    if (filters.search) {
+      const searchTerms = [
         { employeeNumber: { contains: filters.search, mode: 'insensitive' } },
         { designation: { contains: filters.search, mode: 'insensitive' } },
         {
@@ -135,6 +141,16 @@ export class TeacherService {
           },
         },
       ];
+
+      if (whereClause.OR) {
+        whereClause.AND = [
+          { OR: whereClause.OR },
+          { OR: searchTerms },
+        ];
+        delete whereClause.OR;
+      } else {
+        whereClause.OR = searchTerms;
+      }
     }
 
     const [teachers, total] = await Promise.all([

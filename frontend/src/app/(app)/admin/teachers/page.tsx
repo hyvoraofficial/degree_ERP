@@ -405,18 +405,19 @@ export default function TeachersAdminPage() {
         };
       });
 
-      if (activeTab === 'ROSTER') {
-        const filtered = globalBranchId
-          ? enrichedTeachers.filter((t: any) => {
-              if (!t.branchId || t.branchId === globalBranchId) return true;
-              return t.subjects?.some((s: any) => !s.branchId || s.branchId === globalBranchId);
-            })
-          : enrichedTeachers;
-        setTeachers(filtered);
-      } else {
-        const filtered = globalBranchId ? assignData.filter((a: any) => !a.branchId || a.branchId === globalBranchId) : assignData;
-        setAssignments(filtered);
-      }
+      const filteredTeachers = globalBranchId
+        ? enrichedTeachers.filter((t: any) => {
+            if (!t.branchId || t.branchId === globalBranchId) return true;
+            return t.subjects?.some((s: any) => !s.branchId || s.branchId === globalBranchId);
+          })
+        : enrichedTeachers;
+
+      const filteredAssignments = globalBranchId
+        ? assignData.filter((a: any) => !a.branchId || a.branchId === globalBranchId)
+        : assignData;
+
+      setTeachers(filteredTeachers);
+      setAssignments(filteredAssignments);
     } catch (err: any) {
       toast('Failed to load roster data', err.message || 'Server error', 'error');
     } finally {

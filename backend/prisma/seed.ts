@@ -181,17 +181,111 @@ async function main() {
     },
   });
 
-  await prisma.userRole.upsert({
-    where: { uq_user_role: { userId: adminUserId, roleId: roleAdminId } },
-    update: {},
-    create: {
-      academyId,
-      userId: adminUserId,
-      roleId: roleAdminId,
+  // 8. Seed Demo Teachers for Roster
+  const demoTeachers = [
+    {
+      id: '21111111-1111-1111-1111-111111111111',
+      userId: '22222222-2222-2222-2222-222222222222',
+      email: 'ramesh@hyvora.com',
+      firstName: 'Ramesh',
+      lastName: 'Kumar',
+      phone: '+91-9999999902',
+      employeeNumber: 'EMP-HYV-101',
+      designation: 'Senior Faculty',
+      qualification: 'M.Sc. Mathematics, B.Ed.',
     },
-  });
+    {
+      id: '21111111-1111-1111-1111-222222222222',
+      userId: '33333333-3333-3333-3333-333333333333',
+      email: 'ananya@hyvora.com',
+      firstName: 'Ananya',
+      lastName: 'Roy',
+      phone: '+91-9999999903',
+      employeeNumber: 'EMP-HYV-102',
+      designation: 'Head of Science',
+      qualification: 'Ph.D. Chemistry, M.Sc.',
+    },
+    {
+      id: '21111111-1111-1111-1111-333333333333',
+      userId: '44444444-4444-4444-4444-444444444444',
+      email: 'vikram@hyvora.com',
+      firstName: 'Vikram',
+      lastName: 'Malhotra',
+      phone: '+91-9999999904',
+      employeeNumber: 'EMP-HYV-103',
+      designation: 'Lead CS Instructor',
+      qualification: 'M.Tech Computer Science',
+    },
+  ];
 
-  console.log('Production setup completed. Admin account initialized.');
+  for (const t of demoTeachers) {
+    const tPass = await bcrypt.hash('Teacher123!', 10);
+    const u = await prisma.user.upsert({
+      where: { id: t.userId },
+      update: {
+        email: t.email,
+        firstName: t.firstName,
+        lastName: t.lastName,
+        phone: t.phone,
+        status: 'active',
+        deletedAt: null,
+      },
+      create: {
+        id: t.userId,
+        academyId,
+        email: t.email,
+        passwordHash: tPass,
+        initialPassword: 'Teacher123!',
+        firstName: t.firstName,
+        lastName: t.lastName,
+        phone: t.phone,
+        status: 'active',
+        isEmailVerified: true,
+        isDefaultPassword: false,
+      },
+    });
+
+    await prisma.userRole.upsert({
+      where: { uq_user_role: { userId: u.id, roleId: roleTeacherId } },
+      update: { deletedAt: null },
+      create: {
+        academyId,
+        userId: u.id,
+        roleId: roleTeacherId,
+      },
+    });
+
+    const existingTeacher = await prisma.teacher.findFirst({
+      where: { userId: u.id },
+    });
+
+    if (existingTeacher) {
+      await prisma.teacher.update({
+        where: { id: existingTeacher.id },
+        data: {
+          employeeNumber: t.employeeNumber,
+          designation: t.designation,
+          qualification: t.qualification,
+          status: 'active',
+          deletedAt: null,
+        },
+      });
+    } else {
+      await prisma.teacher.create({
+        data: {
+          id: t.id,
+          academyId,
+          userId: u.id,
+          employeeNumber: t.employeeNumber,
+          designation: t.designation,
+          qualification: t.qualification,
+          status: 'active',
+        },
+      });
+    }
+  }
+
+  console.log('Production setup completed. Admin and Demo Teacher accounts initialized.');
 }
 
 main()
