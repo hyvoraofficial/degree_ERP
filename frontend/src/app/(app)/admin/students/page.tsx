@@ -123,7 +123,8 @@ export default function StudentsPage() {
   const handleCopyStudentCredentials = (student: Student & { temporaryPassword?: string }) => {
     const code = (student.admissionNumber || 'STD').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     const passText = student.temporaryPassword || (student as any).temporaryPassword || `Std#${code}2026!`;
-    const text = `Student Portal Credentials\nUsername: ${student.email}\nPassword: ${passText}\nLogin Portal: http://localhost:3000/login`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const text = `Student Portal Credentials\nUsername: ${student.email}\nPassword: ${passText}\nLogin Portal: ${origin}/login`;
     navigator.clipboard.writeText(text);
     setCopiedId(student.id);
     toast('Credentials Copied', `Portal login info for ${student.firstName} copied to clipboard.`, 'success');

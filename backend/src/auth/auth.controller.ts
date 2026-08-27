@@ -17,7 +17,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 @ApiTags('Authentication')
 @ApiHeader({
   name: 'X-Academy-Subdomain',
-  description: 'Academy subdomain tenant descriptor (e.g. nuclei)',
+  description: 'Academy subdomain tenant descriptor (e.g. demo)',
   required: true,
 })
 @Controller('auth')

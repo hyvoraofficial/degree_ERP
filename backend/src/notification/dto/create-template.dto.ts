@@ -15,7 +15,7 @@ export class CreateTemplateDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'Welcome to Nuclei Academy!', required: false })
+  @ApiProperty({ example: 'Welcome to EduERP!', required: false })
   @IsString()
   @IsOptional()
   subject?: string;

@@ -79,7 +79,7 @@ async function bootstrap() {
   }
 
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3002;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 HYVORA EduERP Backend running in [${process.env.NODE_ENV || 'development'}] mode on port ${port}`);
 }
 

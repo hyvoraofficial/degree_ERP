@@ -12,7 +12,7 @@ export class TriggerTemplateDto {
   @IsNotEmpty()
   templateName: string;
 
-  @ApiProperty({ example: { firstName: 'Suresh', portalLink: 'https://nuclei.hyvora.com' } })
+  @ApiProperty({ example: { firstName: 'Suresh', portalLink: 'https://demo.hyvora.com' } })
   @IsObject()
   @IsNotEmpty()
   variables: Record<string, string>;

@@ -28,7 +28,7 @@ export class CreatePageDto {
   @IsNotEmpty()
   status: PageStatus;
 
-  @ApiProperty({ example: 'About Nuclei Academy ERP', required: false })
+  @ApiProperty({ example: 'About EduERP Platform', required: false })
   @IsString()
   @IsOptional()
   metaTitle?: string;

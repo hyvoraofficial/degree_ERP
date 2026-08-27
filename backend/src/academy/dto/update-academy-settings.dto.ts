@@ -22,7 +22,7 @@ export class UpdateAcademySettingsDto {
   @IsOptional()
   phone?: string;
 
-  @ApiProperty({ example: 'contact@nuclei.edu', description: 'Academy contact email address', required: false })
+  @ApiProperty({ example: 'contact@academy.edu', description: 'Academy contact email address', required: false })
   @IsEmail({}, { message: 'Invalid contact email format.' })
   @IsOptional()
   email?: string;

@@ -18,7 +18,7 @@ import { RequirePermissions } from '../common/decorators/permissions.decorator';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'X-Academy-Subdomain',
-  description: 'Academy subdomain tenant descriptor (e.g. nuclei)',
+  description: 'Academy subdomain tenant descriptor (e.g. demo)',
   required: true,
 })
 @UseGuards(TenantGuard, JwtAuthGuard, RbacGuard)

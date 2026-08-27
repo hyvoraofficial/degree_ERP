@@ -132,19 +132,19 @@ export const MOCK_FEE_ALLOCATIONS: FeeAllocation[] = [
 ];
 
 export const MOCK_PAYMENT_TRANSACTIONS: PaymentTransaction[] = [
-  { id: 'pt1', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa111111-1111-1111-1111-111111111111', amount: 60000.00, currency: 'INR', paymentMethod: 'bank_transfer', gatewayTransactionRef: 'TXN-NUC-BT987', status: 'completed', retryCount: 0, createdAt: '2026-06-25T10:30:00Z', updatedAt: '2026-06-25T10:30:00Z' },
+  { id: 'pt1', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa111111-1111-1111-1111-111111111111', amount: 60000.00, currency: 'INR', paymentMethod: 'bank_transfer', gatewayTransactionRef: 'TXN-HYV-BT987', status: 'completed', retryCount: 0, createdAt: '2026-06-25T10:30:00Z', updatedAt: '2026-06-25T10:30:00Z' },
   { id: 'pt2', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa222222-2222-2222-2222-222222222222', amount: 120000.00, currency: 'INR', paymentMethod: 'gateway', gatewayProvider: 'razorpay', gatewayOrderId: 'order_rp_priya123', gatewayTransactionRef: 'pay_rp_priya_txn1', status: 'completed', retryCount: 0, createdAt: '2026-06-28T15:45:00Z', updatedAt: '2026-06-28T15:45:00Z' }
 ];
 
 export const MOCK_PAYMENTS: PaymentLedgerEntry[] = [
-  { id: 'pay1', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa111111-1111-1111-1111-111111111111', paymentTransactionId: 'pt1', amountPaid: 60000.00, paymentDate: '2026-06-25T10:30:00Z', receiptNumber: 'REC-NUC-2026-0001', paymentMode: 'bank_transfer', referenceNo: 'TXN-NUC-BT987', remarks: 'Tuition installment 1', recordedBy: 'u1111111-1111-1111-1111-111111111111', createdAt: '2026-06-25T10:30:00Z', updatedAt: '2026-06-25T10:30:00Z' },
-  { id: 'pay2', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa222222-2222-2222-2222-222222222222', paymentTransactionId: 'pt2', amountPaid: 120000.00, paymentDate: '2026-06-28T15:45:00Z', receiptNumber: 'REC-NUC-2026-0002', paymentMode: 'online_gateway', referenceNo: 'pay_rp_priya_txn1', remarks: 'Tuition Paid Full', recordedBy: 'u1111111-1111-1111-1111-111111111111', createdAt: '2026-06-28T15:45:00Z', updatedAt: '2026-06-28T15:45:00Z' }
+  { id: 'pay1', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa111111-1111-1111-1111-111111111111', paymentTransactionId: 'pt1', amountPaid: 60000.00, paymentDate: '2026-06-25T10:30:00Z', receiptNumber: 'REC-HYV-2026-0001', paymentMode: 'bank_transfer', referenceNo: 'TXN-HYV-BT987', remarks: 'Tuition installment 1', recordedBy: 'u1111111-1111-1111-1111-111111111111', createdAt: '2026-06-25T10:30:00Z', updatedAt: '2026-06-25T10:30:00Z' },
+  { id: 'pay2', academyId: 'a1111111-1111-1111-1111-111111111111', feeAllocationId: 'fa222222-2222-2222-2222-222222222222', paymentTransactionId: 'pt2', amountPaid: 120000.00, paymentDate: '2026-06-28T15:45:00Z', receiptNumber: 'REC-HYV-2026-0002', paymentMode: 'online_gateway', referenceNo: 'pay_rp_priya_txn1', remarks: 'Tuition Paid Full', recordedBy: 'u1111111-1111-1111-1111-111111111111', createdAt: '2026-06-28T15:45:00Z', updatedAt: '2026-06-28T15:45:00Z' }
 ];
 
 // 6. E-Learning Files
 export const MOCK_MEDIA_FILES = [
-  { id: 'f1', academyId: 'a1111111-1111-1111-1111-111111111111', filename: 'nuc_syllabus_math.pdf', mimeType: 'application/pdf', fileSize: 1048576, storagePath: 'nuclei/syllabus/nuc_syllabus_math.pdf' },
-  { id: 'f2', academyId: 'a1111111-1111-1111-1111-111111111111', filename: 'nuc_assignment1_math.pdf', mimeType: 'application/pdf', fileSize: 512000, storagePath: 'nuclei/assignments/nuc_assignment1_math.pdf' }
+  { id: 'f1', academyId: 'a1111111-1111-1111-1111-111111111111', filename: 'demo_syllabus_math.pdf', mimeType: 'application/pdf', fileSize: 1048576, storagePath: 'demo/syllabus/demo_syllabus_math.pdf' },
+  { id: 'f2', academyId: 'a1111111-1111-1111-1111-111111111111', filename: 'demo_assignment1_math.pdf', mimeType: 'application/pdf', fileSize: 512000, storagePath: 'demo/assignments/demo_assignment1_math.pdf' }
 ];
 
 export const MOCK_STUDY_MATERIALS = [

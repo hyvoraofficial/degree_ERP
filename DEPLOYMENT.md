@@ -28,7 +28,7 @@ HYVORA EduERP is built using a modern decoupled architecture:
 | `CORS_ORIGINS` | Yes | `https://app.hyvora.io,https://*.hyvora.io` | Comma-separated allowed frontend origins. |
 | `STORAGE_BUCKET_URL` | Yes | `https://storage.hyvora.io` | S3 / Supabase object storage endpoint. |
 
-### Backend Service (`backend/.env.production`)
+### Backend Service (`backend/.env`)
 
 ```env
 NODE_ENV=production
@@ -41,7 +41,8 @@ STORAGE_BUCKET_NAME=hyvora-erp-storage
 ENABLE_SWAGGER=false
 ```
 
-### Frontend Service (`frontend/.env.production`)
+### Frontend Service (`frontend/.env.local`)
+
 
 ```env
 NEXT_PUBLIC_API_URL=https://api.hyvora.io/api/v1
@@ -65,7 +66,7 @@ NEXT_PUBLIC_API_URL=https://api.hyvora.io/api/v1
 
 3. Seed Initial Demo Tenant Data (Optional):
    ```bash
-   psql -d hyvora_eduerp -f ../database/seeds/01_nuclei_academy_seed.sql
+   psql -d hyvora_eduerp -f ../database/seeds/01_hyvora_academy_seed.sql
    ```
 
 ---
@@ -194,7 +195,7 @@ volumes:
 
 ## 7. Nginx Reverse Proxy Setup & Wildcard Subdomain SSL
 
-Below is a production Nginx server block supporting multi-tenant subdomains (`nuclei.hyvora.io`, `ecity.hyvora.io`):
+Below is a production Nginx server block supporting multi-tenant subdomains (`demo.hyvora.io`, `app.hyvora.io`):
 
 ```nginx
 # API Backend Proxy

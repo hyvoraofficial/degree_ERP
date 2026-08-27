@@ -37,7 +37,7 @@ export class CreateBranchDto {
   @IsNotEmpty()
   contactNumber: string;
 
-  @ApiProperty({ example: 'ecity@nuclei.edu', description: 'Contact email of the branch' })
+  @ApiProperty({ example: 'branch@academy.edu', description: 'Contact email of the branch' })
   @IsEmail()
   @IsNotEmpty()
   email: string;

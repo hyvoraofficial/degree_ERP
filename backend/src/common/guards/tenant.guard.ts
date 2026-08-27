@@ -16,7 +16,7 @@ export class TenantGuard implements CanActivate {
       request.query?.x_subdomain
     );
 
-    // Fallback resolution from Host header (e.g., nuclei.hyvora.com)
+    // Fallback resolution from Host header (e.g., demo.hyvora.com)
     if (!subdomain && request.headers.host) {
       const host = request.headers.host.split(':')[0];
       const parts = host.split('.');

@@ -240,7 +240,8 @@ export default function AdmissionsPage() {
   // Copy credentials helper
   const handleCopyCredentials = () => {
     if (!createdStudent) return;
-    const text = `Username/Email: ${createdStudent.email}\nGenerated Password: ${createdStudent.temporaryPassword}\nLogin Portal: http://localhost:3001/login`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const text = `Username/Email: ${createdStudent.email}\nGenerated Password: ${createdStudent.temporaryPassword}\nLogin Portal: ${origin}/login`;
     navigator.clipboard.writeText(text);
     toast('Copied', 'Student credentials copied to clipboard.', 'success');
   };

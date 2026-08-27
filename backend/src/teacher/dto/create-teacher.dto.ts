@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, IsOptional, IsDateString, IsObject } from 'class-validator';
 
 export class CreateTeacherDto {
-  @ApiProperty({ example: 'teacher1@nuclei.edu', description: 'Teacher email address for portal login' })
+  @ApiProperty({ example: 'teacher1@academy.edu', description: 'Teacher email address for portal login' })
   @IsEmail({}, { message: 'Invalid email address format.' })
   @IsNotEmpty()
   email: string;

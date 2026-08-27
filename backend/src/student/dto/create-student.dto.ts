@@ -53,7 +53,7 @@ export class StudentDocumentsDto {
 }
 
 export class CreateStudentDto {
-  @ApiProperty({ example: 'arjun@nuclei.edu', description: 'Unique email address for user login' })
+  @ApiProperty({ example: 'arjun@academy.edu', description: 'Unique email address for user login' })
   @IsEmail({}, { message: 'Please enter a valid email format.' })
   @IsNotEmpty({ message: 'Email address is required.' })
   email: string;
@@ -89,7 +89,7 @@ export class CreateStudentDto {
   @IsNotEmpty({ message: 'Batch is required.' })
   batchId: string;
 
-  @ApiProperty({ example: 'NUC-2026-0001', description: 'Unique school admission number (optional)', required: false })
+  @ApiProperty({ example: 'HYV-2026-0001', description: 'Unique school admission number (optional)', required: false })
   @Transform(({ value }) => (value === '' || value === null ? undefined : value))
   @IsString()
   @IsOptional()

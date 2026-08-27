@@ -311,7 +311,7 @@ export function Navbar() {
                 <Input
                   label="Branch Email *"
                   id="bEmail"
-                  placeholder="koramangala@nuclei.edu"
+                  placeholder="branch@academy.edu"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
                   error={fieldErrors.email}

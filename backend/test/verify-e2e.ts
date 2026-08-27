@@ -22,8 +22,8 @@ async function runE2ECheck() {
       console.log('Seeding default demo Academy...');
       academy = await prisma.academy.create({
         data: {
-          name: 'Nuclei Science Academy',
-          subdomain: 'nuclei',
+          name: 'Hyvora Academy',
+          subdomain: 'hyvora',
           status: 'active',
         },
       });
@@ -31,7 +31,7 @@ async function runE2ECheck() {
     console.log(`[PASS] Academy Verified: ${academy.name} (id: ${academy.id}, subdomain: ${academy.subdomain})`);
 
     // 2. Verify / Create Admin User
-    const adminEmail = 'admin@nuclei.edu';
+    const adminEmail = 'admin@hyvora.com';
     let adminUser = await prisma.user.findFirst({ where: { academyId: academy.id, email: adminEmail } });
     if (!adminUser) {
       const hash = await bcrypt.hash('admin123', 10);
@@ -61,7 +61,7 @@ async function runE2ECheck() {
           state: 'Karnataka',
           pincode: '560100',
           contactNumber: '+91-9876543210',
-          email: 'ecity@nuclei.edu',
+          email: 'ecity@hyvora.com',
           status: 'active',
         },
       });
@@ -120,7 +120,7 @@ async function runE2ECheck() {
     console.log(`[PASS] Batch Verified: ${batch.name} (id: ${batch.id})`);
 
     // 7. Verify / Create Teacher
-    const teacherEmail = 'teacher@nuclei.edu';
+    const teacherEmail = 'teacher@hyvora.com';
     let teacherUser = await prisma.user.findFirst({ where: { academyId: academy.id, email: teacherEmail } });
     if (!teacherUser) {
       const hash = await bcrypt.hash('teacher123', 10);
@@ -151,7 +151,7 @@ async function runE2ECheck() {
     console.log(`[PASS] Teacher Verified: ${teacherUser.firstName} ${teacherUser.lastName} (id: ${teacher.id})`);
 
     // 8. Verify / Create Student
-    const studentEmail = 'arjun@nuclei.edu';
+    const studentEmail = 'arjun@hyvora.com';
     let studentUser = await prisma.user.findFirst({ where: { academyId: academy.id, email: studentEmail } });
     if (!studentUser) {
       const hash = await bcrypt.hash('student123', 10);
@@ -163,7 +163,7 @@ async function runE2ECheck() {
           firstName: 'Arjun',
           lastName: 'Mehta',
           status: 'active',
-          initialPassword: 'Std#NUC2026!01',
+          initialPassword: 'Std#HYV2026!01',
         },
       });
     }
@@ -176,7 +176,7 @@ async function runE2ECheck() {
           userId: studentUser.id,
           courseId: course.id,
           batchId: batch.id,
-          admissionNumber: 'NUC-2026-0001',
+          admissionNumber: 'HYV-2026-0001',
           dateOfBirth: new Date('2008-05-15'),
           parentName: 'Devendra Mehta',
           parentPhone: '+91-9876543211',

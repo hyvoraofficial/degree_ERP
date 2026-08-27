@@ -8,7 +8,7 @@ export enum UserStatus {
 }
 
 export class UpdateUserDto {
-  @ApiProperty({ example: 'john.doe@nuclei.edu', required: false })
+  @ApiProperty({ example: 'john.doe@academy.edu', required: false })
   @IsEmail()
   @IsOptional()
   email?: string;

@@ -8,7 +8,7 @@ This document details the REST API specifications for **HYVORA EduERP**. All end
 
 ### Tenant Isolation
 Every request must specify the active tenant. The system detects the tenant via:
-1. Custom header: `X-Academy-Subdomain: nuclei`
+1. Custom header: `X-Academy-Subdomain: demo`
 2. Subdomain mapping (automatically resolved in edge middleware).
 
 ### Global Envelope Format
@@ -46,7 +46,7 @@ Every request must specify the active tenant. The system detects the tenant via:
 * **Request Body**:
   ```json
   {
-    "email": "admin@nuclei.edu",
+    "email": "admin@academy.edu",
     "password": "securepassword",
     "role": "ACADEMY_ADMIN"
   }
@@ -63,7 +63,7 @@ Every request must specify the active tenant. The system detects the tenant via:
       "token": "eyJhbGciOiJIUzI1NiIsIn...",
       "user": {
         "id": "u1111111-1111-1111-1111-111111111111",
-        "email": "admin@nuclei.edu",
+        "email": "admin@academy.edu",
         "firstName": "Hemanth",
         "lastName": "Admin",
         "role": "ACADEMY_ADMIN"
@@ -93,12 +93,12 @@ Every request must specify the active tenant. The system detects the tenant via:
       "secondaryColor": "#06B6D4",
       "address": "123 Science Park Drive",
       "phone": "+91-9876543210",
-      "email": "info@nuclei.edu",
+      "email": "info@academy.edu",
       "timezone": "Asia/Kolkata",
       "currency": "INR",
       "logo": {
         "id": "f1111111-1111-1111-1111-111111111111",
-        "storagePath": "nuclei/syllabus/nuc_syllabus_math.pdf"
+        "storagePath": "demo/syllabus/demo_syllabus_math.pdf"
       }
     }
   }
@@ -130,11 +130,12 @@ Every request must specify the active tenant. The system detects the tenant via:
 * **Endpoint**: `/api/v1/students`
 * **Method**: `GET`
 * **Auth Required**: Yes
-* **Permissions**: `students:read` (Academy Admin, Teacher)
+* **Permissions**: `students:read` (Teacher, Academy Admin, Super Admin)
 * **Query Parameters**:
-  * `page` (optional, default: `1`)
-  * `limit` (optional, default: `10`)
-  * `batchId` (optional, filters by batch)
+  * `search` (optional): Filter by student name or admission number.
+  * `batchId` (optional): Filter by batch UUID.
+  * `page` (optional, default: `1`): Pagination page index.
+  * `limit` (optional, default: `10`): Page size limit.
 * **Success Response (`200 OK`)**:
   ```json
   {
@@ -143,10 +144,10 @@ Every request must specify the active tenant. The system detects the tenant via:
       "students": [
         {
           "id": "s1111111-1111-1111-1111-111111111111",
-          "admissionNumber": "NUC-2026-0001",
+          "admissionNumber": "ADM-2026-0001",
           "firstName": "Arjun",
           "lastName": "Mehta",
-          "email": "arjun@nuclei.edu",
+          "email": "arjun@academy.edu",
           "status": "active"
         }
       ],
@@ -167,10 +168,10 @@ Every request must specify the active tenant. The system detects the tenant via:
 * **Request Body**:
   ```json
   {
-    "email": "newstudent@nuclei.edu",
+    "email": "newstudent@academy.edu",
     "firstName": "Rohan",
     "lastName": "Gupta",
-    "admissionNumber": "NUC-2026-0003",
+    "admissionNumber": "ADM-2026-0003",
     "dateOfBirth": "2010-12-04",
     "gender": "male",
     "parentName": "Devendra Gupta",

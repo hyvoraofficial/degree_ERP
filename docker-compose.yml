@@ -1,29 +1,9 @@
 # ==========================================
 # HYVORA EduERP - Production Docker Compose
+# Architecture: Next.js Frontend + NestJS Backend -> Supabase PostgreSQL & Storage
 # ==========================================
 
 services:
-  # ----------------------------------------
-  # PostgreSQL Database Service
-  # ----------------------------------------
-  postgres:
-    image: postgres:15-alpine
-    container_name: hyvora-postgres
-    restart: always
-    environment:
-      POSTGRES_DB: hyvora_eduerp
-      POSTGRES_USER: hyvora_user
-      POSTGRES_PASSWORD: hyvora_secure_pass
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hyvora_user -d hyvora_eduerp"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   # ----------------------------------------
   # NestJS Backend API Service
   # ----------------------------------------
@@ -32,21 +12,24 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: hyvora-backend
-    restart: always
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
     environment:
-      NODE_ENV: production
-      PORT: 3002
-      DATABASE_URL: postgresql://hyvora_user:hyvora_secure_pass@postgres:5432/hyvora_eduerp?schema=public
-      JWT_SECRET: production_super_secret_jwt_key_hyvora_eduerp
-      CORS_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002,https://*.hyvora.io
-      STORAGE_BUCKET_URL: https://storage.hyvora.io
-      STORAGE_BUCKET_NAME: hyvora-erp-storage
-      ENABLE_SWAGGER: "true"
+      - NODE_ENV=production
+      - PORT=3002
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,https://hyvorademo.in,https://*.hyvora.in
+      - ENABLE_SWAGGER=true
     ports:
       - "3002:3002"
-    depends_on:
-      postgres:
-        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - hyvora-network
 
   # ----------------------------------------
   # Next.js Frontend Web Application Service
@@ -58,18 +41,28 @@ services:
       args:
         NEXT_PUBLIC_API_URL: http://localhost:3002/api/v1
     container_name: hyvora-frontend
-    restart: always
+    restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3002/api/v1
+      - NODE_ENV=production
+      - PORT=3001
+      - NEXT_PUBLIC_API_URL=http://localhost:3002/api/v1
     ports:
       - "3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - hyvora-network
 
 # ----------------------------------------
-# Persistent Storage Volumes
+# Isolated Application Network Bridge
 # ----------------------------------------
-volumes:
-  postgres_data:
-    driver: local
+networks:
+  hyvora-network:
+    driver: bridge

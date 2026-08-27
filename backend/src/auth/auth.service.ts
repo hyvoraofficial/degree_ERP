@@ -15,11 +15,11 @@ export class AuthService {
 
   async authenticate(academyId: string, dto: LoginDto, ipAddress?: string, userAgent?: string) {
     const searchIdentifier = dto.email.trim().toLowerCase();
-    const isAdminLookup = searchIdentifier === 'admin' || searchIdentifier === 'admin@hyvora.com' || searchIdentifier === 'admin@nuclei.edu';
     
+    // 1. Search for user by email within specified academy (or global)
     let user = await this.prisma.user.findFirst({
       where: {
-        email: isAdminLookup ? { in: ['admin@hyvora.com', 'admin@nuclei.edu'] } : { equals: searchIdentifier, mode: 'insensitive' },
+        email: { equals: searchIdentifier, mode: 'insensitive' },
         deletedAt: null,
         ...(academyId !== 'platform' && academyId !== 'platform-global' ? { academyId } : {}),
       },
@@ -30,8 +30,8 @@ export class AuthService {
       },
     });
 
-    // Fallback 1: Search by email without academyId restriction if login comes from main domain
-    if (!user && !isAdminLookup) {
+    // 2. Fallback: Search by email across all tenant accounts if not constrained to specific academy
+    if (!user) {
       user = await this.prisma.user.findFirst({
         where: {
           email: { equals: searchIdentifier, mode: 'insensitive' },
@@ -45,8 +45,8 @@ export class AuthService {
       });
     }
 
-    // Fallback 1b: Search by Teacher Employee Number
-    if (!user && !isAdminLookup) {
+    // 3. Fallback: Search by Teacher Employee Number
+    if (!user) {
       const teacherRecord = await this.prisma.teacher.findFirst({
         where: {
           employeeNumber: { equals: searchIdentifier, mode: 'insensitive' },
@@ -67,27 +67,6 @@ export class AuthService {
       }
     }
 
-    // Fallback 2: If user not found by email and is admin lookup, try finding first user with ACADEMY_ADMIN / SUPER_ADMIN role
-    if (!user && isAdminLookup) {
-      user = await this.prisma.user.findFirst({
-        where: {
-          deletedAt: null,
-          userRoles: {
-            some: {
-              role: {
-                code: { in: ['ACADEMY_ADMIN', 'SUPER_ADMIN'] },
-              },
-            },
-          },
-        },
-        include: {
-          userRoles: {
-            include: { role: true },
-          },
-        },
-      });
-    }
-
     if (!user) {
       await this.prisma.loginActivity.create({
         data: {
@@ -100,9 +79,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid login email address or password.');
     }
 
-    // Verify password: support configured admin@123 password and bcrypt hash comparison
-    const isSpecialAdminPass = (dto.password === 'admin@123' || dto.password === 'admin');
-    const passwordMatch = isSpecialAdminPass || await bcrypt.compare(dto.password, user.passwordHash);
+    // Verify password strictly using bcrypt hash comparison
+    const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
     
     if (!passwordMatch) {
       await this.prisma.loginActivity.create({
@@ -125,7 +103,7 @@ export class AuthService {
 
     const effectiveRole = matchingRoleObj 
       ? matchingRoleObj.role.code.toUpperCase()
-      : (isAdminLookup ? 'ACADEMY_ADMIN' : 'STUDENT');
+      : (user.userRoles[0]?.role?.code?.toUpperCase() || 'ACADEMY_ADMIN');
 
     // Generate token set
     const tokens = await this.generateTokens(user.id, user.email, user.academyId, effectiveRole);

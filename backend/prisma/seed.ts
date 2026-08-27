@@ -25,15 +25,16 @@ async function main() {
   const roleTeacherId = 'e3333333-3333-3333-3333-333333333333';
   const roleStudentId = 'e4444444-4444-4444-4444-444444444444';
 
+  // NOTE: Hyvora Academy is demonstration seed data and is not a production tenant assumption.
   // 1. Production Academy Setup
   const academy = await prisma.academy.upsert({
     where: { id: academyId },
     update: {},
     create: {
       id: academyId,
-      name: 'Nuclei Academy',
-      subdomain: 'nuclei',
-      domain: 'nucleiacademy.edu',
+      name: 'Hyvora Academy',
+      subdomain: 'hyvora',
+      domain: 'hyvora.edu',
       status: 'active',
     },
   });
@@ -49,7 +50,7 @@ async function main() {
       secondaryColor: '#06B6D4',
       address: '123 Science Park Drive, Tech City, Karnataka, India',
       phone: '+91-9876543210',
-      email: 'info@nuclei.edu',
+      email: 'info@hyvora.com',
       timezone: 'Asia/Kolkata',
       currency: 'INR',
       theme: 'system',
@@ -190,7 +191,7 @@ async function main() {
     },
   });
 
-  console.log('Production setup completed. Admin account admin@nuclei.edu initialized.');
+  console.log('Production setup completed. Admin account initialized.');
 }
 
 main()

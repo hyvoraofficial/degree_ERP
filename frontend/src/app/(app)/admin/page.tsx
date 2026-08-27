@@ -205,7 +205,8 @@ export default function AdminDashboard() {
 
   // Copy credentials helper
   const handleCopyCredentials = (email: string, pass: string, role: string, id: string) => {
-    const text = `${role} Portal Credentials\nUsername: ${email}\nPassword: ${pass}\nLogin URL: http://localhost:3001/login`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const text = `${role} Portal Credentials\nUsername: ${email}\nPassword: ${pass}\nLogin URL: ${origin}/login`;
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     toast('Credentials Copied', `Portal login credentials copied to clipboard.`, 'success');

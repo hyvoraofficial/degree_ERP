@@ -1,3 +1,4 @@
+-- NOTE: Hyvora Academy is demonstration seed data and is not a production tenant assumption.
 -- Seeds for Hyvora Academy Demo (Multi-Tenant SaaS)
 
 -- 1. Create Academy
@@ -110,15 +111,15 @@ VALUES
 INSERT INTO users (id, academy_id, email, password_hash, first_name, last_name, phone, status)
 VALUES
 -- Admin: Hemanth
-('u1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'admin@nuclei.edu', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a2', 'Nucleii', 'Admin', '+91-9999999901', 'active'),
+('u1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'admin@hyvora.com', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a2', 'Hyvora', 'Admin', '+91-9999999901', 'active'),
 -- Teacher: Ramesh Kumar
-('u2222222-2222-2222-2222-222222222222', 'a1111111-1111-1111-1111-111111111111', 'ramesh@nuclei.edu', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a3', 'Ramesh', 'Kumar', '+91-9999999902', 'active'),
+('u2222222-2222-2222-2222-222222222222', 'a1111111-1111-1111-1111-111111111111', 'ramesh@hyvora.com', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a3', 'Ramesh', 'Kumar', '+91-9999999902', 'active'),
 -- Teacher: Sunita Sharma
-('u3333333-3333-3333-3333-333333333333', 'a1111111-1111-1111-1111-111111111111', 'sunita@nuclei.edu', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a4', 'Sunita', 'Sharma', '+91-9999999903', 'active'),
+('u3333333-3333-3333-3333-333333333333', 'a1111111-1111-1111-1111-111111111111', 'sunita@hyvora.com', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a4', 'Sunita', 'Sharma', '+91-9999999903', 'active'),
 -- Student: Arjun Mehta
-('u4444444-4444-4444-4444-444444444444', 'a1111111-1111-1111-1111-111111111111', 'arjun@nuclei.edu', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a5', 'Arjun', 'Mehta', '+91-9999999904', 'active'),
+('u4444444-4444-4444-4444-444444444444', 'a1111111-1111-1111-1111-111111111111', 'arjun@hyvora.com', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a5', 'Arjun', 'Mehta', '+91-9999999904', 'active'),
 -- Student: Priya Nair
-('u5555555-5555-5555-5555-555555555555', 'a1111111-1111-1111-1111-111111111111', 'priya@nuclei.edu', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a6', 'Priya', 'Nair', '+91-9999999905', 'active');
+('u5555555-5555-5555-5555-555555555555', 'a1111111-1111-1111-1111-111111111111', 'priya@hyvora.com', '$2b$12$K1dD6r6.C/2b3W27i/sBpejS.W.npx72lZ2y8s22R2n3.x4y5z1a6', 'Priya', 'Nair', '+91-9999999905', 'active');
 
 -- 7. Assign User Roles
 INSERT INTO user_roles (academy_id, user_id, role_id)
@@ -136,7 +137,7 @@ VALUES
     't1111111-1111-1111-1111-111111111111',
     'a1111111-1111-1111-1111-111111111111',
     'u2222222-2222-2222-2222-222222222222',
-    'EMP-NUC-101',
+    'EMP-HYV-101',
     '{"Mathematics", "Physics"}'::varchar[],
     'M.Sc. in Mathematics, B.Ed.',
     '2024-06-01',
@@ -146,7 +147,7 @@ VALUES
     't2222222-2222-2222-2222-222222222222',
     'a1111111-1111-1111-1111-111111111111',
     'u3333333-3333-3333-3333-333333333333',
-    'EMP-NUC-102',
+    'EMP-HYV-102',
     '{"Computer Science", "Mathematics"}'::varchar[],
     'MCA, M.Tech in CS',
     '2024-08-15',
@@ -160,7 +161,7 @@ VALUES
     's1111111-1111-1111-1111-111111111111',
     'a1111111-1111-1111-1111-111111111111',
     'u4444444-4444-4444-4444-444444444444',
-    'NUC-2026-0001',
+    'HYV-2026-0001',
     '2026-03-10',
     '2010-05-15',
     'male',
@@ -173,7 +174,7 @@ VALUES
     's2222222-2222-2222-2222-222222222222',
     'a1111111-1111-1111-1111-111111111111',
     'u5555555-5555-5555-5555-555555555555',
-    'NUC-2026-0002',
+    'HYV-2026-0002',
     '2026-03-12',
     '2011-08-22',
     'female',
@@ -242,7 +243,7 @@ VALUES
     'Math_Syllabus_Class10_Final.pdf',
     'application/pdf',
     1048576, -- 1MB
-    'nuclei/syllabus/nuc_syllabus_math.pdf',
+    'hyvora/syllabus/hyv_syllabus_math.pdf',
     'academic-materials',
     'public',
     'u2222222-2222-2222-2222-222222222222'
@@ -254,7 +255,7 @@ VALUES
     'Homework_Assignment1_Trig.pdf',
     'application/pdf',
     512000, -- 500KB
-    'nuclei/assignments/nuc_assignment1_math.pdf',
+    'hyvora/assignments/hyv_assignment1_math.pdf',
     'academic-materials',
     'restricted',
     'u2222222-2222-2222-2222-222222222222'
@@ -266,7 +267,7 @@ VALUES
     'ArjunMehta_MathAssignment1_Solved.pdf',
     'application/pdf',
     2097152, -- 2MB
-    'nuclei/student-submissions/arjun_sol_assignment1.pdf',
+    'hyvora/student-submissions/arjun_sol_assignment1.pdf',
     'student-vault',
     'private',
     'u4444444-4444-4444-4444-444444444444'
@@ -321,7 +322,7 @@ VALUES
     'bank_transfer',
     NULL,
     NULL,
-    'TXN-NUC-BT987',
+    'TXN-HYV-BT987',
     'completed',
     '{"bank": "State Bank of India", "auth_code": "SBI8872"}'::jsonb,
     0
@@ -365,9 +366,9 @@ VALUES
     'pt111111-1111-1111-1111-111111111111',
     60000.00,
     '2026-06-25 10:30:00+05:30',
-    'REC-NUC-2026-0001',
+    'REC-HYV-2026-0001',
     'bank_transfer',
-    'TXN-NUC-BT987',
+    'TXN-HYV-BT987',
     'u1111111-1111-1111-1111-111111111111' -- Recorded by Admin Hemanth
 ),
 (
@@ -377,7 +378,7 @@ VALUES
     'pt222222-2222-2222-2222-222222222222',
     120000.00,
     '2026-06-28 15:45:00+05:30',
-    'REC-NUC-2026-0002',
+    'REC-HYV-2026-0002',
     'online_gateway',
     'pay_rp_priya_txn1',
     'u1111111-1111-1111-1111-111111111111'
@@ -506,10 +507,10 @@ VALUES
     'a1111111-1111-1111-1111-111111111111',
     'Homepage',
     'home',
-    '{"hero_title": "Welcome to Nuclei Academy", "hero_subtitle": "Nurturing Innovation and Science Leadership", "sections": [{"type": "features", "title": "Our Features", "items": ["Modern CS Lab", "Robotics Competitions", "Advanced Calculus Stream"]}]}'::jsonb,
+    '{"hero_title": "Welcome to Hyvora Academy", "hero_subtitle": "Nurturing Innovation and Science Leadership", "sections": [{"type": "features", "title": "Our Features", "items": ["Modern CS Lab", "Robotics Competitions", "Advanced Calculus Stream"]}]}'::jsonb,
     'published',
-    'Nuclei Academy - Tech & Science Leadership Academy',
-    'Official website homepage of Nuclei Academy.'
+    'Hyvora Academy - Tech & Science Leadership Academy',
+    'Official website homepage of Hyvora Academy.'
 );
 
 INSERT INTO testimonials (id, academy_id, author_name, author_role, content, rating, is_featured)
@@ -533,7 +534,7 @@ VALUES
     'kiran.verma@outlook.com',
     '+91-8888888801',
     'Admission query for term 2',
-    'Hi, does Nuclei Academy accept middle-term lateral admissions for Grade 10?',
+    'Hi, does Hyvora Academy accept middle-term lateral admissions for Grade 10?',
     'pending'
 );
 
