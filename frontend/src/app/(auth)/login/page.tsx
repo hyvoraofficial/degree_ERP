@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/providers/ToastProvider';
 import { parseFieldErrors } from '@/utils/validation';
-import { ShieldCheck, GraduationCap, Users, LayoutDashboard, Lock } from 'lucide-react';
+import { ShieldCheck, GraduationCap, Users, LayoutDashboard, Lock, Eye, EyeOff } from 'lucide-react';
 
 function LoginFormContent() {
   const router = useRouter();
@@ -23,6 +23,7 @@ function LoginFormContent() {
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
   const [selectedRole, setSelectedRole] = React.useState<UserRole>('ACADEMY_ADMIN');
   const [rememberMe, setRememberMe] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
@@ -207,11 +208,22 @@ function LoginFormContent() {
           <Input
             label="Password *"
             id="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
             error={fieldErrors.password}
             placeholder="Enter your password"
+            rightElement={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer transition-colors"
+                title={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            }
           />
 
           {/* Remember Me checkbox */}
