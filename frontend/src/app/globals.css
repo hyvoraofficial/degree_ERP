@@ -1,23 +1,26 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --background: #f8fafc;
   --foreground: #0f172a;
   --primary-color: #4f46e5;
   --secondary-color: #06b6d4;
   --card: #ffffff;
   --card-foreground: #0f172a;
-  --border: #cbd5e1;
+  --border: #e2e8f0;
   --ring: #4f46e5;
   --radius: 12px;
 }
 
+/* Force clean, high-contrast light theme across all portals */
 .dark {
+  color-scheme: light;
   --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
-  --border: #cbd5e1;
+  --border: #e2e8f0;
   --ring: #4f46e5;
 }
 
@@ -34,12 +37,22 @@
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Universal high-contrast overrides for subject catalog & table views */
+table th {
+  color: #334155 !important;
+  background-color: #f8fafc !important;
+}
+
+table td {
+  color: #0f172a !important;
 }
 
 /* Slide in animation for toast */
