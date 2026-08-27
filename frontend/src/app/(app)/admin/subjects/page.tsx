@@ -303,39 +303,39 @@ export default function SubjectsPage() {
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">
             Subject & Teacher Management
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-xs font-semibold text-slate-500 mt-1">
             Manage academic subjects, track course mappings, and assign faculty teachers to subject cohorts.
           </p>
         </div>
         
         <div className="flex gap-2">
-          <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-border">
+          <div className="flex p-1 bg-slate-100 rounded-xl border border-slate-200">
             <button
               onClick={() => setActiveTab('CATALOG')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors ${
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'CATALOG'
-                  ? 'bg-card text-zinc-900 dark:text-zinc-50 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Subject Catalog
             </button>
             <button
               onClick={() => setActiveTab('ASSIGNMENTS')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors ${
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'ASSIGNMENTS'
-                  ? 'bg-card text-zinc-900 dark:text-zinc-50 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Teacher Assignments
             </button>
           </div>
           {activeTab === 'CATALOG' && (
-            <Button onClick={handleOpenCreate} className="gap-2 h-10 shrink-0" disabled={courses.length === 0}>
+            <Button onClick={handleOpenCreate} className="gap-2 h-10 shrink-0 cursor-pointer" disabled={courses.length === 0}>
               <Plus className="w-4 h-4" /> Create Subject
             </Button>
           )}
@@ -345,15 +345,15 @@ export default function SubjectsPage() {
       {activeTab === 'CATALOG' && (
         <>
           {/* Filter and Search Bar */}
-          <Card className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search by subject name or code..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium text-zinc-700 dark:text-zinc-300"
+                className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-300 bg-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary text-slate-900"
               />
             </div>
             
@@ -361,7 +361,7 @@ export default function SubjectsPage() {
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="h-10 rounded-xl border border-border bg-card px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                className="h-10 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
               >
                 <option value="">All Courses</option>
                 {courses.map(c => (
@@ -372,7 +372,7 @@ export default function SubjectsPage() {
               <select
                 value={selectedStatusFilter}
                 onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                className="h-10 rounded-xl border border-border bg-card px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                className="h-10 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
               >
                 <option value="">All Statuses</option>
                 <option value="active">Active</option>
@@ -380,36 +380,36 @@ export default function SubjectsPage() {
                 <option value="archived">Archived</option>
               </select>
 
-              <Button variant="secondary" onClick={fetchSubjects} className="h-10 gap-1.5 shrink-0">
+              <Button variant="outline" onClick={fetchSubjects} className="h-10 gap-1.5 shrink-0 border-slate-200 text-slate-700 bg-white hover:bg-slate-50">
                 <RefreshCw className="w-4 h-4" /> Refresh
               </Button>
             </div>
-          </Card>
+          </div>
 
           {/* Main Table view */}
-          <Card className="overflow-hidden border border-border">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
             {isLoading ? (
               <div className="p-16 flex flex-col items-center justify-center gap-3">
                 <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-                <p className="text-sm font-semibold text-zinc-500 animate-pulse">Loading Subject Catalog...</p>
+                <p className="text-xs font-semibold text-slate-500 animate-pulse">Loading Subject Catalog...</p>
               </div>
             ) : subjects.length === 0 ? (
               <div className="p-16 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-400">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
                   <Book className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">No Subjects Found</h3>
-                  <p className="text-sm text-zinc-500 max-w-sm">
+                  <h3 className="text-base font-bold text-slate-900">No Subjects Found</h3>
+                  <p className="text-xs text-slate-500 max-w-sm">
                     No active subjects are configured. Create new ones or refine search filters.
                   </p>
                 </div>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left text-sm">
+                <table className="w-full border-collapse text-left text-xs">
                   <thead>
-                    <tr className="border-b border-border bg-zinc-50/50 dark:bg-zinc-900/50 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider text-[11px]">
                       <th className="px-6 py-4">Subject</th>
                       <th className="px-6 py-4">Course</th>
                       <th className="px-6 py-4">Subject Code</th>
@@ -418,39 +418,45 @@ export default function SubjectsPage() {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border font-medium text-zinc-700 dark:text-zinc-300">
+                  <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
                     {subjects.map((sub) => (
-                      <tr key={sub.id} className="hover:bg-zinc-50/40 dark:hover:bg-zinc-900/10">
+                      <tr key={sub.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-zinc-900 dark:text-zinc-50 block">{sub.name}</span>
-                            {sub.description && <span className="text-xs text-zinc-400 font-semibold line-clamp-1">{sub.description}</span>}
+                            <span className="font-bold text-slate-900 text-sm block capitalize">{sub.name}</span>
+                            {sub.description && <span className="text-xs text-slate-500 font-semibold line-clamp-1">{sub.description}</span>}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-zinc-850 dark:text-zinc-200">{sub.course?.name || 'Unmapped Course'}</span>
+                          <span className="font-bold text-slate-800 uppercase text-xs">{sub.course?.name || 'Unmapped Course'}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-xs font-bold rounded tracking-wider">{sub.code}</span>
+                          <span className="px-2.5 py-1 bg-slate-900 text-white font-mono font-bold text-[11px] rounded-lg tracking-wider">{sub.code}</span>
                         </td>
-                        <td className="px-6 py-4 capitalize">{sub.subjectType}</td>
+                        <td className="px-6 py-4 capitalize font-semibold text-slate-700">{sub.subjectType}</td>
                         <td className="px-6 py-4">
-                          <Badge variant={sub.status === 'active' ? 'success' : sub.status === 'archived' ? 'warning' : 'neutral'}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            sub.status === 'active'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : sub.status === 'archived'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}>
                             {sub.status}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => handleOpenEdit(sub)}
-                              className="p-2 rounded-lg border border-border text-zinc-400 hover:text-primary transition-colors cursor-pointer"
+                              className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:text-primary hover:bg-slate-50 transition-colors cursor-pointer"
                               title="Edit Subject"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleOpenDelete(sub)}
-                              className="p-2 rounded-lg border border-border text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer"
+                              className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                               title="Delete Subject"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -463,23 +469,23 @@ export default function SubjectsPage() {
                 </table>
               </div>
             )}
-          </Card>
+          </div>
         </>
       )}
 
       {activeTab === 'ASSIGNMENTS' && (
         <div className="space-y-6">
-          <Card className="p-6 space-y-4 border border-border">
-            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Assign Teacher to Subject Cohort</h3>
-            <p className="text-xs text-zinc-400">Select Branch, Course, Subject, Batch, and Faculty Teacher to provision teaching authority.</p>
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs space-y-4">
+            <h3 className="text-base font-extrabold text-slate-900">Assign Teacher to Subject Cohort</h3>
+            <p className="text-xs font-semibold text-slate-500">Select Branch, Course, Subject, Batch, and Faculty Teacher to provision teaching authority.</p>
 
             <form onSubmit={handleCreateAssignment} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 pt-2">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Branch</label>
+                <label className="text-xs font-bold text-slate-800">Branch</label>
                 <select
                   value={assignBranchId}
                   onChange={(e) => handleAssignBranchChange(e.target.value)}
-                  className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="h-10 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
                 >
                   <option value="">Select Branch</option>
                   {branches.map(b => (
@@ -489,12 +495,12 @@ export default function SubjectsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Course</label>
+                <label className="text-xs font-bold text-slate-800">Course</label>
                 <select
                   value={assignCourseId}
                   disabled={!assignBranchId}
                   onChange={(e) => handleAssignCourseChange(e.target.value)}
-                  className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="h-10 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <option value="">Select Course</option>
                   {assignCourses.map(c => (
@@ -504,12 +510,12 @@ export default function SubjectsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Subject</label>
+                <label className="text-xs font-bold text-slate-800">Subject</label>
                 <select
                   value={assignSubjectId}
                   disabled={!assignCourseId}
                   onChange={(e) => setAssignSubjectId(e.target.value)}
-                  className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="h-10 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <option value="">Select Subject</option>
                   {assignSubjects.map(s => (
@@ -519,12 +525,12 @@ export default function SubjectsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Batch</label>
+                <label className="text-xs font-bold text-slate-800">Batch</label>
                 <select
                   value={assignBatchId}
                   disabled={!assignCourseId}
                   onChange={(e) => setAssignBatchId(e.target.value)}
-                  className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="h-10 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <option value="">Select Batch</option>
                   {assignBatches.map(b => (
@@ -534,11 +540,11 @@ export default function SubjectsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Teacher</label>
+                <label className="text-xs font-bold text-slate-800">Teacher</label>
                 <select
                   value={assignTeacherId}
                   onChange={(e) => setAssignTeacherId(e.target.value)}
-                  className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="h-10 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
                 >
                   <option value="">Select Teacher</option>
                   {teachersList.map(t => (
@@ -548,54 +554,54 @@ export default function SubjectsPage() {
               </div>
 
               <div className="sm:col-span-2 md:col-span-5 flex justify-end pt-2">
-                <Button type="submit" disabled={isAssigning} className="gap-2">
+                <Button type="submit" disabled={isAssigning} className="gap-2 cursor-pointer">
                   <UserCheck className="w-4 h-4" /> {isAssigning ? 'Assigning...' : 'Assign Teacher'}
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
 
           {/* Assignments List */}
-          <Card className="overflow-hidden border border-border">
-            <div className="p-4 border-b border-border bg-zinc-50/50 dark:bg-zinc-900/50 flex justify-between items-center">
-              <h4 className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">Active Faculty Cohort Mappings</h4>
-              <Button size="sm" variant="secondary" onClick={fetchAssignments} className="gap-1.5 text-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+              <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Active Faculty Cohort Mappings</h4>
+              <Button size="sm" variant="outline" onClick={fetchAssignments} className="gap-1.5 text-xs cursor-pointer border-slate-200 text-slate-700 bg-white hover:bg-slate-50">
                 <RefreshCw className="w-3.5 h-3.5" /> Refresh
               </Button>
             </div>
 
             {assignments.length === 0 ? (
-              <div className="p-12 text-center text-xs font-semibold text-zinc-400">
+              <div className="p-12 text-center text-xs font-semibold text-slate-500">
                 No active teacher-subject assignments mapped.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-semibold">
                   <thead>
-                    <tr className="border-b border-border text-zinc-400 uppercase tracking-wider">
-                      <th className="px-6 py-3">Teacher</th>
-                      <th className="px-6 py-3">Subject</th>
-                      <th className="px-6 py-3">Course</th>
-                      <th className="px-6 py-3">Batch</th>
-                      <th className="px-6 py-3">Branch</th>
-                      <th className="px-6 py-3 text-right">Actions</th>
+                    <tr className="border-b border-slate-200 text-slate-700 uppercase tracking-wider text-[11px] bg-slate-50">
+                      <th className="px-6 py-3.5">Teacher</th>
+                      <th className="px-6 py-3.5">Subject</th>
+                      <th className="px-6 py-3.5">Course</th>
+                      <th className="px-6 py-3.5">Batch</th>
+                      <th className="px-6 py-3.5">Branch</th>
+                      <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border text-zinc-700 dark:text-zinc-300">
+                  <tbody className="divide-y divide-slate-100 text-slate-800">
                     {assignments.map(a => (
-                      <tr key={a.id} className="hover:bg-zinc-50/40 dark:hover:bg-zinc-900/10">
-                        <td className="px-6 py-3 font-bold text-zinc-900 dark:text-zinc-100">
+                      <tr key={a.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-6 py-3.5 font-bold text-slate-900">
                           {a.teacher?.user?.firstName} {a.teacher?.user?.lastName}
-                          <span className="text-[10px] font-medium text-zinc-400 block">{a.teacher?.employeeNumber}</span>
+                          <span className="text-[10px] font-semibold text-slate-500 block">{a.teacher?.employeeNumber}</span>
                         </td>
-                        <td className="px-6 py-3 text-primary font-bold">{a.subject?.name}</td>
-                        <td className="px-6 py-3">{a.course?.name}</td>
-                        <td className="px-6 py-3">{a.batch?.name}</td>
-                        <td className="px-6 py-3">{a.branch?.name}</td>
-                        <td className="px-6 py-3 text-right">
+                        <td className="px-6 py-3.5 text-primary font-extrabold">{a.subject?.name}</td>
+                        <td className="px-6 py-3.5 font-bold text-slate-800">{a.course?.name}</td>
+                        <td className="px-6 py-3.5 text-slate-700">{a.batch?.name}</td>
+                        <td className="px-6 py-3.5 text-slate-700">{a.branch?.name}</td>
+                        <td className="px-6 py-3.5 text-right">
                           <button
                             onClick={() => handleRemoveAssignment(a.id)}
-                            className="p-1.5 rounded-lg border border-border text-zinc-400 hover:text-rose-500 transition-colors"
+                            className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                             title="Remove Assignment"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -607,7 +613,7 @@ export default function SubjectsPage() {
                 </table>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       )}
 
