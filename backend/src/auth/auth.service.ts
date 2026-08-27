@@ -73,6 +73,28 @@ export class AuthService {
       }
     }
 
+    // 4. Fallback: Search by Student Admission Number
+    if (!user) {
+      const studentRecord = await this.prisma.student.findFirst({
+        where: {
+          admissionNumber: { equals: searchIdentifier, mode: 'insensitive' },
+          deletedAt: null,
+        },
+        include: {
+          user: {
+            include: {
+              userRoles: {
+                include: { role: true },
+              },
+            },
+          },
+        },
+      });
+      if (studentRecord?.user) {
+        user = studentRecord.user as any;
+      }
+    }
+
     if (!user) {
       await this.prisma.loginActivity.create({
         data: {
@@ -85,8 +107,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid login email address or password.');
     }
 
-    // Verify password strictly using bcrypt hash comparison (with fallback for admin demo)
+    // Verify password strictly using bcrypt hash comparison (with fallback for initialPassword & admin demo)
     let passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!passwordMatch && user.initialPassword && dto.password === user.initialPassword) {
+      passwordMatch = true;
+    }
     if (!passwordMatch && (dto.password === 'admin' || dto.password === 'AdminPassword123!')) {
       passwordMatch = true;
     }
