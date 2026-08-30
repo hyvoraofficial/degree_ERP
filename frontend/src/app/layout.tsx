@@ -10,6 +10,15 @@ import { BranchProvider } from '@/providers/BranchProvider';
 export const metadata: Metadata = {
   title: 'HYVORA EduERP - SaaS Educational Platform',
   description: 'Enterprise grade educational management resource planning system.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+  },
 };
 
 export default function RootLayout({
