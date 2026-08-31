@@ -17,8 +17,7 @@ export class AuthService {
     const searchIdentifier = dto.email.trim().toLowerCase();
     const possibleEmails = Array.from(new Set([
       searchIdentifier,
-      'admin@hyvora.com',
-      'admin',
+      ...(searchIdentifier === 'admin' ? ['admin@hyvora.com', 'admin'] : []),
       searchIdentifier.includes('@') ? searchIdentifier : `${searchIdentifier}@hyvora.com`,
     ]));
     

@@ -189,6 +189,31 @@ function LoginFormContent() {
           </div>
         </div>
 
+        {/* Demo Credentials Helper Pill */}
+        <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs flex items-center justify-between">
+          <div>
+            <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+              Admin Credentials
+            </div>
+            <div className="text-slate-500 text-[11px] mt-0.5">
+              Username: <code className="bg-slate-200 px-1 py-0.5 rounded font-mono text-slate-900 font-bold">admin</code> &bull; Pass: <code className="bg-slate-200 px-1 py-0.5 rounded font-mono text-slate-900 font-bold">admin</code>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedRole('ACADEMY_ADMIN');
+              setEmail('admin');
+              setPassword('admin');
+              setFieldErrors({});
+            }}
+            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg transition-colors border border-indigo-200"
+          >
+            Auto-fill
+          </button>
+        </div>
+
         {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-4 pt-1" noValidate>
           <Input
@@ -199,7 +224,7 @@ function LoginFormContent() {
             onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
             error={fieldErrors.email}
             placeholder={
-              selectedRole === 'ACADEMY_ADMIN' ? 'admin@yourdomain.com' :
+              selectedRole === 'ACADEMY_ADMIN' ? 'admin' :
               selectedRole === 'TEACHER' ? 'teacher@yourdomain.com' :
               selectedRole === 'STUDENT' ? 'student@yourdomain.com' : 'user@yourdomain.com'
             }
@@ -212,7 +237,7 @@ function LoginFormContent() {
             value={password}
             onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
             error={fieldErrors.password}
-            placeholder="Enter your password"
+            placeholder={selectedRole === 'ACADEMY_ADMIN' ? 'admin' : 'Enter your password'}
             rightElement={
               <button
                 type="button"
