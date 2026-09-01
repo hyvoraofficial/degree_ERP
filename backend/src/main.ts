@@ -31,15 +31,16 @@ async function bootstrap() {
     })
   );
 
-  // Secure CORS configuration
+  // Production-safe CORS configuration
   const rawOrigins = process.env.CORS_ORIGINS || '';
   const configuredOrigins = rawOrigins
     ? rawOrigins.split(',').map((o) => o.trim()).filter(Boolean)
     : [];
 
-  const defaultAllowedPatterns = [
-    'http://localhost:3000',
+  const defaultAllowedOrigins = [
+    'https://eduerp.hyvorademo.in',
     'http://localhost:3001',
+    'http://localhost:3000',
     'http://localhost:3002',
     '*.hyvorademo.in',
     'hyvorademo.in',
@@ -48,18 +49,18 @@ async function bootstrap() {
     '*.vercel.app',
   ];
 
-  const allOriginPatterns = [...configuredOrigins, ...defaultAllowedPatterns];
+  const allowedOriginsList = [...configuredOrigins, ...defaultAllowedOrigins];
 
   app.enableCors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      // Allow requests with no origin (e.g. server-side, curl, mobile apps) or non-production
-      if (!origin || !isProduction) {
+      // Allow requests with no origin (e.g. server-to-server, mobile native, curl)
+      if (!origin) {
         return callback(null, true);
       }
 
       const cleanOrigin = origin.replace(/^https?:\/\//, '').toLowerCase();
 
-      const isAllowed = allOriginPatterns.some((pattern) => {
+      const isAllowed = allowedOriginsList.some((pattern) => {
         if (pattern === '*' || pattern === origin) return true;
         const cleanPattern = pattern.replace(/^https?:\/\//, '').toLowerCase();
 
