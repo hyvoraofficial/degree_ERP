@@ -32,33 +32,62 @@ async function bootstrap() {
   );
 
   // Secure CORS configuration
-  const rawOrigins = process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001,http://localhost:3002';
-  const allowedOrigins = rawOrigins.split(',').map((o) => o.trim());
+  const rawOrigins = process.env.CORS_ORIGINS || '';
+  const configuredOrigins = rawOrigins
+    ? rawOrigins.split(',').map((o) => o.trim()).filter(Boolean)
+    : [];
+
+  const defaultAllowedPatterns = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    '*.hyvorademo.in',
+    'hyvorademo.in',
+    '*.hyvora.io',
+    'hyvora.io',
+    '*.vercel.app',
+  ];
+
+  const allOriginPatterns = [...configuredOrigins, ...defaultAllowedPatterns];
 
   app.enableCors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (e.g. server-side, curl, mobile apps) or non-production
       if (!origin || !isProduction) {
         return callback(null, true);
       }
-      // Check if origin matches allowed domains or wildcard subdomains
-      const isAllowed = allowedOrigins.some((allowed) => {
-        if (allowed === '*' || allowed === origin) return true;
-        if (allowed.startsWith('https://*.')) {
-          const domain = allowed.replace('https://*.', '');
-          return origin.endsWith(`.${domain}`);
+
+      const cleanOrigin = origin.replace(/^https?:\/\//, '').toLowerCase();
+
+      const isAllowed = allOriginPatterns.some((pattern) => {
+        if (pattern === '*' || pattern === origin) return true;
+        const cleanPattern = pattern.replace(/^https?:\/\//, '').toLowerCase();
+
+        if (cleanPattern.startsWith('*.')) {
+          const rootDomain = cleanPattern.slice(2);
+          return cleanOrigin === rootDomain || cleanOrigin.endsWith(`.${rootDomain}`);
         }
-        return false;
+
+        return cleanOrigin === cleanPattern;
       });
 
       if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS origin violation: ${origin} is not allowed`));
+        callback(null, false);
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Academy-Subdomain', 'Accept'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Academy-Subdomain',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
+    exposedHeaders: ['Set-Cookie'],
   });
 
   // Initialize Swagger Open API documentation (Development / Configurable)

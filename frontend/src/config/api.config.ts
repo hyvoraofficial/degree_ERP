@@ -3,8 +3,11 @@
  * Resolves API Base URL from NEXT_PUBLIC_API_URL environment variable,
  * falling back to local NestJS development server URL.
  */
-export const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1';
+const rawBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1').trim().replace(/\/+$/, '');
+
+export const API_BASE_URL = rawBaseUrl.endsWith('/api/v1')
+  ? rawBaseUrl
+  : `${rawBaseUrl}/api/v1`;
 
 export const getApiUrl = (endpoint: string): string => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
