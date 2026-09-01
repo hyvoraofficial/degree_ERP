@@ -700,17 +700,27 @@ export default function TeachersAdminPage() {
                     return (
                       <tr key={t.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4 font-black text-slate-950">
-                          <div className="flex flex-col">
-                            <span className="font-extrabold text-slate-950 text-sm">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenViewTeacher(t)}
+                            className="flex flex-col text-left group cursor-pointer focus:outline-none"
+                          >
+                            <span className="font-extrabold text-slate-950 text-sm group-hover:text-indigo-600 group-hover:underline transition-colors">
                               {firstName} {lastName}
                             </span>
                             {t.user?.phone && (
                               <span className="text-xs text-slate-600 font-semibold">{t.user.phone}</span>
                             )}
-                          </div>
+                          </button>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-xs rounded font-bold font-mono">{t.employeeNumber}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenViewTeacher(t)}
+                            className="px-2 py-0.5 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-xs rounded font-bold font-mono text-slate-900 hover:text-indigo-600 transition-colors cursor-pointer"
+                          >
+                            {t.employeeNumber}
+                          </button>
                         </td>
                         <td className="px-6 py-4">
                           {t.subjects && t.subjects.length > 0 ? (

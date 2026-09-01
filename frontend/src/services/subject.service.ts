@@ -60,7 +60,7 @@ export const subjectService = {
     return body.data;
   },
 
-  update: async (id: string, data: { name?: string; code?: string; description?: string; subjectType?: string; status?: string }): Promise<Subject> => {
+  update: async (id: string, data: { name?: string; code?: string; description?: string; subjectType?: string; status?: string; courseId?: string }): Promise<Subject> => {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/academic/subjects/${id}`, {
       method: 'PATCH',

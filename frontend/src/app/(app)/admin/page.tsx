@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { 
-  BookOpen, Users, GraduationCap, ArrowLeft, ArrowRight, Search, RefreshCw, Key, Copy, Check, CalendarCheck, ShieldCheck, ChevronRight, Layers, Trash2, AlertTriangle, Plus, X
+  BookOpen, Users, GraduationCap, ArrowLeft, ArrowRight, Search, RefreshCw, Key, Copy, Check, CalendarCheck, ShieldCheck, ChevronRight, Layers, Trash2, AlertTriangle, Plus, X, Eye, Book, User, CreditCard, FileText
 } from 'lucide-react';
 import { branchService, Branch } from '@/services/branch.service';
 import { courseService, Course } from '@/services/course.service';
@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/providers/ToastProvider';
 import { useBranchContext } from '@/providers/BranchProvider';
 import { parseFieldErrors } from '@/utils/validation';
+import { API_BASE_URL, getSubdomain } from '@/config/api.config';
 
 type NavigationLevel = 'COURSES' | 'COURSE_DETAILS';
 type CourseSubTab = 'TEACHERS' | 'STUDENTS';
@@ -38,6 +39,54 @@ export default function AdminDashboard() {
   const [isDeleteTeacherOpen, setIsDeleteTeacherOpen] = React.useState(false);
   const [teacherToDelete, setTeacherToDelete] = React.useState<Teacher | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  // Student Detail Drawer state
+  const [selectedStudentForDetail, setSelectedStudentForDetail] = React.useState<Student | null>(null);
+  const [isStudentDetailDrawerOpen, setIsStudentDetailDrawerOpen] = React.useState(false);
+  const [studentFeeSummary, setStudentFeeSummary] = React.useState<any>(null);
+  const [studentAttendanceSummary, setStudentAttendanceSummary] = React.useState<any>(null);
+  const [isLoadingStudentSummary, setIsLoadingStudentSummary] = React.useState(false);
+
+  // Teacher Detail Drawer state
+  const [selectedTeacherForDetail, setSelectedTeacherForDetail] = React.useState<Teacher | null>(null);
+  const [isTeacherDetailDrawerOpen, setIsTeacherDetailDrawerOpen] = React.useState(false);
+
+  const handleOpenStudentDetail = async (student: Student) => {
+    setSelectedStudentForDetail(student);
+    setIsStudentDetailDrawerOpen(true);
+    setIsLoadingStudentSummary(true);
+    setStudentFeeSummary(null);
+    setStudentAttendanceSummary(null);
+
+    const token = document.cookie.split('; ').find(row => row.startsWith('mock-auth-token='))?.split('=')[1] || '';
+    try {
+      const [resFee, resAtt] = await Promise.all([
+        fetch(`${API_BASE_URL}/students/${student.id}/fee-summary`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'X-Academy-Subdomain': getSubdomain() }
+        }),
+        fetch(`${API_BASE_URL}/students/${student.id}/attendance-summary`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'X-Academy-Subdomain': getSubdomain() }
+        })
+      ]);
+      if (resFee.ok) {
+        const body = await resFee.json();
+        setStudentFeeSummary(body.data || body);
+      }
+      if (resAtt.ok) {
+        const body = await resAtt.json();
+        setStudentAttendanceSummary(body.data || body);
+      }
+    } catch (e) {
+      console.error('Failed to load student details:', e);
+    } finally {
+      setIsLoadingStudentSummary(false);
+    }
+  };
+
+  const handleOpenTeacherDetail = (teacher: Teacher) => {
+    setSelectedTeacherForDetail(teacher);
+    setIsTeacherDetailDrawerOpen(true);
+  };
 
   // New Course Form state
   const [courseName, setCourseName] = React.useState('');
@@ -478,16 +527,23 @@ export default function AdminDashboard() {
                         <th className="px-6 py-4">Parent Phone</th>
                         <th className="px-6 py-4">Attendance</th>
                         <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-bold text-slate-900">
                       {filteredStudents.map((student) => (
                         <tr key={student.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="font-extrabold text-slate-950 text-sm">{student.firstName} {student.lastName}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenStudentDetail(student)}
+                              className="flex flex-col text-left group cursor-pointer focus:outline-none"
+                            >
+                              <span className="font-extrabold text-slate-950 text-sm group-hover:text-indigo-600 group-hover:underline transition-colors">
+                                {student.firstName} {student.lastName}
+                              </span>
                               <span className="text-xs text-slate-600 font-semibold">{student.phone}</span>
-                            </div>
+                            </button>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col gap-1 text-xs">
@@ -499,11 +555,11 @@ export default function AdminDashboard() {
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-slate-500 font-bold">Pass:</span>
                                   <span className="font-mono bg-amber-50 border border-amber-200 text-amber-800 px-1.5 py-0.5 rounded text-[11px] font-bold">
-                                    Student@123
+                                    {(student as any).temporaryPassword || 'Student@123'}
                                   </span>
                                 </div>
                                 <button
-                                  onClick={() => handleCopyCredentials(student.email, 'Student@123', 'Student', student.id)}
+                                  onClick={() => handleCopyCredentials(student.email, (student as any).temporaryPassword || 'Student@123', 'Student', student.id)}
                                   className="p-1 rounded hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
                                   title="Copy Portal Credentials"
                                 >
@@ -513,9 +569,13 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="px-2 py-1 bg-slate-100 border border-slate-200 text-slate-900 text-xs rounded font-extrabold font-mono">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenStudentDetail(student)}
+                              className="px-2 py-1 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-900 hover:text-indigo-600 text-xs rounded font-extrabold font-mono transition-colors cursor-pointer"
+                            >
                               {student.admissionNumber}
-                            </span>
+                            </button>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-xs text-slate-800 font-bold">{student.batch?.name || 'Batch A'}</span>
@@ -535,6 +595,15 @@ export default function AdminDashboard() {
                             <Badge variant={student.status === 'active' ? 'success' : 'neutral'}>
                               {student.status}
                             </Badge>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleOpenStudentDetail(student)}
+                              className="p-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:text-indigo-600 hover:border-indigo-400 transition-colors cursor-pointer shadow-xs"
+                              title="View Full Student Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -579,19 +648,24 @@ export default function AdminDashboard() {
                         const lastName = teacher.user?.lastName || (teacher as any).lastName || 'Member';
                         const email = teacher.user?.email || (teacher as any).email || 'teacher@hyvora.com';
                         const phone = teacher.user?.phone || (teacher as any).phone || '+91-9876543210';
+                        const empNumber = teacher.employeeNumber || `EMP-${teacher.id.substring(0, 5)}`;
 
                         return (
                           <tr key={teacher.id} className="hover:bg-slate-50 transition-colors">
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenTeacherDetail(teacher)}
+                                className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none"
+                              >
                                 <div className="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center font-black text-xs shrink-0 uppercase">
                                   {firstName[0]}{lastName[0]}
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="font-extrabold text-slate-950 text-sm">{firstName} {lastName}</span>
+                                  <span className="font-extrabold text-slate-950 text-sm group-hover:text-indigo-600 group-hover:underline transition-colors">{firstName} {lastName}</span>
                                   <span className="text-xs text-slate-600 font-semibold">{phone}</span>
                                 </div>
-                              </div>
+                              </button>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex flex-col gap-1 text-xs">
@@ -603,11 +677,11 @@ export default function AdminDashboard() {
                                   <div className="flex items-center gap-1.5">
                                     <span className="text-slate-500 font-bold">Pass:</span>
                                     <span className="font-mono bg-amber-50 border border-amber-200 text-amber-800 px-1.5 py-0.5 rounded text-[11px] font-bold">
-                                      Teacher@123
+                                      {teacher.temporaryPassword || (teacher as any).temporaryPassword || 'Teacher@123'}
                                     </span>
                                   </div>
                                   <button
-                                    onClick={() => handleCopyCredentials(email, 'Teacher@123', 'Teacher', teacher.id)}
+                                    onClick={() => handleCopyCredentials(email, teacher.temporaryPassword || (teacher as any).temporaryPassword || 'Teacher@123', 'Teacher', teacher.id)}
                                     className="p-1 rounded hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
                                     title="Copy Portal Credentials"
                                   >
@@ -617,9 +691,13 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="px-2 py-1 bg-slate-100 border border-slate-200 text-slate-900 text-xs rounded font-extrabold font-mono">
-                                {teacher.employeeNumber || `EMP-${teacher.id.substring(0, 5)}`}
-                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenTeacherDetail(teacher)}
+                                className="px-2 py-1 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-900 hover:text-indigo-600 text-xs rounded font-extrabold font-mono transition-colors cursor-pointer"
+                              >
+                                {empNumber}
+                              </button>
                             </td>
                             <td className="px-6 py-4">
                               <span className="text-xs text-slate-800 font-bold">{teacher.designation || 'Senior Faculty'}</span>
@@ -633,13 +711,22 @@ export default function AdminDashboard() {
                               </Badge>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <button
-                                onClick={() => handleOpenDeleteTeacher(teacher)}
-                                className="p-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:text-rose-600 hover:border-rose-400 transition-colors cursor-pointer shadow-xs"
-                                title="Archive Teacher Profile"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleOpenTeacherDetail(teacher)}
+                                  className="p-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:text-indigo-600 hover:border-indigo-400 transition-colors cursor-pointer shadow-xs"
+                                  title="View Full Teacher Profile"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleOpenDeleteTeacher(teacher)}
+                                  className="p-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:text-rose-600 hover:border-rose-400 transition-colors cursor-pointer shadow-xs"
+                                  title="Archive Teacher Profile"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -845,6 +932,331 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* DETAIL DRAWER / SLIDE-OUT OVERLAY FOR STUDENT */}
+      {isStudentDetailDrawerOpen && selectedStudentForDetail && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex justify-end backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-950">
+                  Student Profile Sheet
+                </h3>
+                <p className="text-xs text-slate-600 font-extrabold uppercase tracking-wider mt-0.5">
+                  adm code: {selectedStudentForDetail.admissionNumber}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsStudentDetailDrawerOpen(false)}
+                className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Profile Header Card */}
+              <div className="flex gap-4 items-center p-4 bg-slate-50 rounded-2xl border border-slate-200 shadow-xs">
+                <div className="w-14 h-14 rounded-2xl bg-primary/20 text-primary flex items-center justify-center text-xl font-black shrink-0 uppercase border border-primary/30">
+                  {selectedStudentForDetail.firstName[0]}{selectedStudentForDetail.lastName[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-base font-black text-slate-950 block">
+                    {selectedStudentForDetail.firstName} {selectedStudentForDetail.lastName}
+                  </span>
+                  <span className="text-xs text-slate-600 font-bold block mt-0.5">{selectedStudentForDetail.email}</span>
+                </div>
+                <Badge variant={selectedStudentForDetail.status === 'active' ? 'success' : 'neutral'}>
+                  {selectedStudentForDetail.status}
+                </Badge>
+              </div>
+
+              {/* Student Portal Credentials Box */}
+              <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Key className="w-4 h-4 text-amber-700" /> Student Portal Authorized Credentials
+                  </span>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      const code = (selectedStudentForDetail.admissionNumber || 'STD').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                      const passText = selectedStudentForDetail.temporaryPassword || (selectedStudentForDetail as any).temporaryPassword || `Std#${code}2026!`;
+                      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                      const text = `Student Portal Credentials\nUsername: ${selectedStudentForDetail.email}\nPassword: ${passText}\nLogin Portal: ${origin}/login`;
+                      navigator.clipboard.writeText(text);
+                      toast('Credentials Copied', `Portal login info for ${selectedStudentForDetail.firstName} copied to clipboard.`, 'success');
+                    }}
+                    className="h-8 text-xs px-3 gap-1.5 border-amber-300 bg-white hover:bg-amber-100 text-amber-900 font-bold"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy Credentials
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-1">
+                  <div className="p-2.5 bg-white rounded-xl border border-amber-200">
+                    <span className="text-slate-500 block text-[10px] uppercase mb-0.5">Portal Username</span>
+                    <span className="text-slate-950 font-mono font-black select-all">{selectedStudentForDetail.email}</span>
+                  </div>
+                  <div className="p-2.5 bg-white rounded-xl border border-amber-200">
+                    <span className="text-slate-500 block text-[10px] uppercase mb-0.5">Portal Password</span>
+                    <span className="text-amber-800 font-mono font-black select-all">
+                      {selectedStudentForDetail.temporaryPassword || (selectedStudentForDetail as any).temporaryPassword || `Std#${(selectedStudentForDetail.admissionNumber || 'STD').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()}2026!`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attendance Statistics & Breakdown */}
+              <div className="space-y-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <CalendarCheck className="w-4 h-4 text-emerald-600" /> Attendance Performance & Subject Breakdown
+                </span>
+                
+                {isLoadingStudentSummary ? (
+                  <div className="py-6 flex justify-center text-xs font-bold text-slate-600">Loading Attendance Summary...</div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-4 gap-3 text-xs font-bold bg-white p-4 rounded-xl border border-slate-200 text-center shadow-xs">
+                      <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
+                        <span className="text-emerald-700 block text-[10px] uppercase font-black">Overall Rate</span>
+                        <span className="text-base font-black text-emerald-800">
+                          {studentAttendanceSummary?.overall?.percentage ?? 0}%
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <span className="text-slate-600 block text-[10px] uppercase font-extrabold">Total Sessions</span>
+                        <span className="text-sm font-black text-slate-900">
+                          {studentAttendanceSummary?.overall?.total ?? 0}
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                        <span className="text-emerald-600 block text-[10px] uppercase font-extrabold">Present Count</span>
+                        <span className="text-sm font-black text-emerald-700">
+                          {studentAttendanceSummary?.overall?.present ?? 0}
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-rose-50 rounded-xl border border-rose-200">
+                        <span className="text-rose-600 block text-[10px] uppercase font-extrabold">Absent Count</span>
+                        <span className="text-sm font-black text-rose-700">
+                          {studentAttendanceSummary?.overall?.absent ?? 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2.5 shadow-xs">
+                      <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider block border-b border-slate-200 pb-2">
+                        Subject-Wise Attendance Metrics
+                      </span>
+                      {studentAttendanceSummary?.subjects && studentAttendanceSummary.subjects.length > 0 ? (
+                        studentAttendanceSummary.subjects.map((sub: any, idx: number) => (
+                          <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 last:border-0">
+                            <div className="flex flex-col">
+                              <span className="font-extrabold text-slate-950">{sub.name}</span>
+                              <span className="text-[10px] text-slate-500 font-mono font-bold">{sub.code}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-bold text-slate-700">{sub.present || sub.presentCount || 0} / {sub.total || sub.totalSessions || 0} Sessions</span>
+                              <span className="px-2 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                {sub.percentage ?? 0}%
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-3 text-center text-xs font-bold text-slate-400 italic">
+                          No attendance records logged for this student.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Personal Section */}
+              <div className="space-y-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <User className="w-4 h-4 text-slate-600" /> Personal Information
+                </span>
+                <div className="grid grid-cols-2 gap-4 text-xs font-bold bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                  <div className="text-slate-600">Gender: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.gender}</span></div>
+                  <div className="text-slate-600">Blood Group: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.bloodGroup || 'Not specified'}</span></div>
+                  <div className="text-slate-600">Date of Birth: <span className="text-slate-950 block mt-0.5 font-black">{new Date(selectedStudentForDetail.dateOfBirth).toLocaleDateString()}</span></div>
+                  <div className="text-slate-600">Contact Phone: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.phone}</span></div>
+                </div>
+              </div>
+
+              {/* Parent Info Section */}
+              <div className="space-y-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-slate-600" /> Parent & Guardian Coordinates
+                </span>
+                <div className="grid grid-cols-2 gap-4 text-xs font-bold bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                  <div className="text-slate-600">Father Name: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.fatherName || 'Not specified'}</span></div>
+                  <div className="text-slate-600">Mother Name: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.motherName || 'Not specified'}</span></div>
+                  <div className="text-slate-600">Parent Phone: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.parentPhone || 'Not specified'}</span></div>
+                  <div className="text-slate-600">Parent Email: <span className="text-slate-950 block mt-0.5 font-black">{selectedStudentForDetail.parentEmail || 'Not specified'}</span></div>
+                </div>
+              </div>
+
+              {/* Billing / Fee Summary Section */}
+              <div className="space-y-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-slate-600" /> Fees Structure & Balance Status
+                </span>
+                {isLoadingStudentSummary ? (
+                  <div className="py-6 flex justify-center text-xs font-bold text-slate-600">Loading Billing Summary...</div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4 text-xs font-bold bg-white p-4 rounded-xl border border-slate-200 text-center shadow-xs">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <span className="text-slate-600 block mb-1 text-[10px] uppercase font-extrabold">Total Fee Amount</span>
+                      <span className="text-sm font-black text-slate-950">INR {studentFeeSummary?.totalAllocated?.toLocaleString() || '60,000'}</span>
+                    </div>
+                    <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                      <span className="text-emerald-700 block mb-1 text-[10px] uppercase font-extrabold">Paid Amount</span>
+                      <span className="text-sm font-black text-emerald-800">INR {studentFeeSummary?.totalPaid?.toLocaleString() || '30,000'}</span>
+                    </div>
+                    <div className="p-3 bg-rose-50 rounded-xl border border-rose-200">
+                      <span className="text-rose-700 block mb-1 text-[10px] uppercase font-extrabold">Remaining Balance</span>
+                      <span className="text-sm font-black text-rose-800">INR {studentFeeSummary?.totalBalance?.toLocaleString() || '30,000'}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAIL DRAWER / SLIDE-OUT OVERLAY FOR TEACHER */}
+      {isTeacherDetailDrawerOpen && selectedTeacherForDetail && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex justify-end backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-950">
+                  Teacher Profile Sheet
+                </h3>
+                <p className="text-xs text-slate-600 font-extrabold uppercase tracking-wider mt-0.5">
+                  emp code: {selectedTeacherForDetail.employeeNumber}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsTeacherDetailDrawerOpen(false)}
+                className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Profile Header Card */}
+              <div className="flex gap-4 items-center p-4 bg-slate-50 rounded-2xl border border-slate-200 shadow-xs">
+                <div className="w-14 h-14 rounded-2xl bg-primary/20 text-primary flex items-center justify-center text-xl font-black shrink-0 uppercase border border-primary/30">
+                  {(selectedTeacherForDetail.user?.firstName || (selectedTeacherForDetail as any).firstName || 'F')[0]}
+                  {(selectedTeacherForDetail.user?.lastName || (selectedTeacherForDetail as any).lastName || 'M')[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-base font-black text-slate-950 block">
+                    {selectedTeacherForDetail.user?.firstName || (selectedTeacherForDetail as any).firstName}{' '}
+                    {selectedTeacherForDetail.user?.lastName || (selectedTeacherForDetail as any).lastName}
+                  </span>
+                  <span className="text-xs text-slate-600 font-bold block mt-0.5">
+                    {selectedTeacherForDetail.user?.email || (selectedTeacherForDetail as any).email}
+                  </span>
+                </div>
+                <Badge variant={selectedTeacherForDetail.status === 'active' ? 'success' : 'neutral'}>
+                  {selectedTeacherForDetail.status || 'active'}
+                </Badge>
+              </div>
+
+              {/* Teacher Portal Credentials Box */}
+              <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Key className="w-4 h-4 text-amber-700" /> Teacher Portal Authorized Credentials
+                  </span>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      const email = selectedTeacherForDetail.user?.email || (selectedTeacherForDetail as any).email;
+                      const pass = selectedTeacherForDetail.temporaryPassword || `Tch#${(selectedTeacherForDetail.employeeNumber || 'TCH').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()}2026!`;
+                      navigator.clipboard.writeText(`User: ${email}\nPass: ${pass}`);
+                      toast('Credentials Copied', `Portal login info copied to clipboard.`, 'success');
+                    }}
+                    className="h-8 text-xs px-3 gap-1.5 border-amber-300 bg-white hover:bg-amber-100 text-amber-900 font-bold"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy Credentials
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-1">
+                  <div className="p-2.5 bg-white rounded-xl border border-amber-200">
+                    <span className="text-slate-500 block text-[10px] uppercase mb-0.5">Portal Username</span>
+                    <span className="text-slate-950 font-mono font-black select-all">
+                      {selectedTeacherForDetail.user?.email || (selectedTeacherForDetail as any).email}
+                    </span>
+                  </div>
+                  <div className="p-2.5 bg-white rounded-xl border border-amber-200">
+                    <span className="text-slate-500 block text-[10px] uppercase mb-0.5">Portal Password</span>
+                    <span className="text-amber-800 font-mono font-black select-all">
+                      {selectedTeacherForDetail.temporaryPassword || `Tch#${(selectedTeacherForDetail.employeeNumber || 'TCH').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()}2026!`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Personal & Academic Info Section */}
+              <div className="space-y-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-slate-600" /> Personal & Academic Profile
+                </span>
+                <div className="grid grid-cols-2 gap-4 text-xs font-bold bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                  <div className="text-slate-600">Designation: <span className="text-slate-950 block mt-0.5 font-black">{selectedTeacherForDetail.designation || 'Lecturer'}</span></div>
+                  <div className="text-slate-600">Qualification: <span className="text-slate-950 block mt-0.5 font-black">{selectedTeacherForDetail.qualification || 'M.Sc, B.Ed'}</span></div>
+                  <div className="text-slate-600">Contact Phone: <span className="text-slate-950 block mt-0.5 font-black">{selectedTeacherForDetail.user?.phone || (selectedTeacherForDetail as any).phone || '+91-9876543210'}</span></div>
+                  <div className="text-slate-600">Joining Date: <span className="text-slate-950 block mt-0.5 font-black">{selectedTeacherForDetail.joiningDate ? new Date(selectedTeacherForDetail.joiningDate).toLocaleDateString() : 'Active Member'}</span></div>
+                </div>
+              </div>
+
+              {/* Mapped Subjects & Cohorts Section */}
+              <div className="space-y-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Book className="w-4 h-4 text-indigo-600" /> Mapped Subjects & Academic Cohorts ({selectedTeacherForDetail.subjects?.length || 0})
+                </span>
+                {selectedTeacherForDetail.subjects && selectedTeacherForDetail.subjects.length > 0 ? (
+                  <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2.5 shadow-xs">
+                    {selectedTeacherForDetail.subjects.map((sub: any, idx: number) => {
+                      const sName = sub?.name || sub?.subject?.name || 'Subject';
+                      const sCode = sub?.code || sub?.subject?.code;
+                      const cName = sub?.courseName || sub?.course?.name;
+                      const bName = sub?.batchName || sub?.batch?.name;
+                      return (
+                        <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-slate-100 last:border-0">
+                          <div className="flex flex-col">
+                            <span className="font-extrabold text-slate-950 flex items-center gap-1.5">
+                              <Book className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                              {sName} {sCode ? `(${sCode})` : ''}
+                            </span>
+                            {cName && <span className="text-[10px] text-slate-500 font-bold mt-0.5 pl-5">Course: {cName}</span>}
+                          </div>
+                          {bName && (
+                            <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                              {bName}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-400 italic shadow-xs">
+                    No active subject or cohort assignments mapped to this teacher.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

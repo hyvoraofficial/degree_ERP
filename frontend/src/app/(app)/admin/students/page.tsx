@@ -380,12 +380,16 @@ export default function StudentsPage() {
                 {students.map((student) => (
                   <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-extrabold text-slate-950 text-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDetail(student)}
+                        className="flex flex-col text-left group cursor-pointer focus:outline-none"
+                      >
+                        <span className="font-extrabold text-slate-950 text-sm group-hover:text-indigo-600 group-hover:underline transition-colors">
                           {student.firstName} {student.lastName}
                         </span>
                         <span className="text-xs text-slate-600 font-semibold">{student.phone}</span>
-                      </div>
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1 text-xs">
@@ -411,9 +415,13 @@ export default function StudentsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 bg-slate-100 border border-slate-200 text-slate-900 text-xs rounded font-extrabold font-mono">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDetail(student)}
+                        className="px-2 py-1 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-900 hover:text-indigo-600 text-xs rounded font-extrabold font-mono transition-colors cursor-pointer"
+                      >
                         {student.admissionNumber}
-                      </span>
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-slate-800 font-bold text-xs">

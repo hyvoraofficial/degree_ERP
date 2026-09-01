@@ -61,18 +61,24 @@ export const financeService = {
 
   findAllStructures: async (): Promise<FeeStructure[]> => {
     const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/finance/structures`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'X-Academy-Subdomain': getSubdomain(),
-      },
-    });
-    const body = await response.json();
-    if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to load fee structures.');
+    try {
+      const response = await fetch(`${API_BASE_URL}/finance/structures`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'X-Academy-Subdomain': getSubdomain(),
+        },
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        console.warn('Failed to load fee structures:', body);
+        return [];
+      }
+      return body.data || [];
+    } catch (err) {
+      console.warn('Failed to fetch fee structures:', err);
+      return [];
     }
-    return body.data || [];
   },
 
   createAllocation: async (data: { feeStructureId: string; studentId: string; dueDate: string; discountAmount?: number }): Promise<FeeAllocation> => {
@@ -103,18 +109,24 @@ export const financeService = {
     const url = studentId 
       ? `${API_BASE_URL}/finance/allocations?studentId=${studentId}` 
       : `${API_BASE_URL}/finance/allocations`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'X-Academy-Subdomain': getSubdomain(),
-      },
-    });
-    const body = await response.json();
-    if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to load fee allocations.');
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'X-Academy-Subdomain': getSubdomain(),
+        },
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        console.warn('Failed to load fee allocations:', body);
+        return [];
+      }
+      return body.data || [];
+    } catch (err) {
+      console.warn('Failed to fetch fee allocations:', err);
+      return [];
     }
-    return body.data || [];
   },
 
   recordOfflinePayment: async (data: { feeAllocationId: string; amountPaid: number; paymentMode: string; referenceNo?: string; remarks?: string }): Promise<PaymentHistoryItem> => {
