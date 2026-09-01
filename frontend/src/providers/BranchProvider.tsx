@@ -48,15 +48,13 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
         if (match) {
           setSelectedBranchIdState(match.id);
           localStorage.setItem('activeBranchId', match.id);
-        } else if (branchList.length > 0) {
-          setSelectedBranchIdState(branchList[0].id);
-          localStorage.setItem('activeBranchId', branchList[0].id);
         } else {
-          setSelectedBranchIdState(saved);
+          setSelectedBranchIdState('');
+          localStorage.removeItem('activeBranchId');
         }
-      } else if (branchList.length > 0) {
-        setSelectedBranchIdState(branchList[0].id);
-        localStorage.setItem('activeBranchId', branchList[0].id);
+      } else {
+        // Default to All Branches
+        setSelectedBranchIdState('');
       }
     } catch (err) {
       console.error('Failed to load global branches list:', err);
