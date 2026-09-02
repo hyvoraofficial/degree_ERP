@@ -3,6 +3,54 @@ import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 
+const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
+  SUPER_ADMIN: ['*'],
+  ACADEMY_ADMIN: ['*'],
+  TEACHER: [
+    'materials:create',
+    'materials:read',
+    'materials:update',
+    'materials:delete',
+    'assignments:create',
+    'assignments:read',
+    'assignments:update',
+    'assignments:delete',
+    'assignments:manage',
+    'submissions:grade',
+    'submissions:read',
+    'attendance:create',
+    'attendance:read',
+    'attendance:update',
+    'exams:create',
+    'exams:read',
+    'exams:update',
+    'exams:manage',
+    'results:manage',
+    'results:read',
+    'students:read',
+    'teachers:read',
+    'courses:read',
+    'batches:read',
+    'schedules:read',
+    'branches:read',
+    'users:read',
+  ],
+  STUDENT: [
+    'materials:read',
+    'assignments:read',
+    'submissions:submit',
+    'attendance:read',
+    'exams:read',
+    'results:read',
+    'courses:read',
+    'batches:read',
+    'branches:read',
+    'payments:create',
+    'payments:read',
+    'users:read',
+  ],
+};
+
 @Injectable()
 export class RbacGuard implements CanActivate {
   constructor(
@@ -45,38 +93,43 @@ export class RbacGuard implements CanActivate {
       return true;
     }
 
-    // Retrieve active roles and associated permissions mapped to user within their tenant
-    const userRoles = await this.prisma.userRole.findMany({
-      where: {
-        userId: user.id,
-        academyId: user.academyId,
-        deletedAt: null,
-      },
-      include: {
-        role: {
-          include: {
-            permissions: {
-              include: {
-                permission: true,
+    const defaultRolePerms = DEFAULT_ROLE_PERMISSIONS[user.role] || [];
+    const userPermissionCodes = new Set<string>(defaultRolePerms);
+
+    // Retrieve active custom roles and associated permissions mapped to user within their tenant
+    try {
+      const userRoles = await this.prisma.userRole.findMany({
+        where: {
+          userId: user.id,
+          academyId: user.academyId,
+          deletedAt: null,
+        },
+        include: {
+          role: {
+            include: {
+              permissions: {
+                include: {
+                  permission: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const userPermissionCodes = new Set<string>();
-
-    for (const mapping of userRoles) {
-      const role = mapping.role;
-      if (role.code === 'ACADEMY_ADMIN' || role.code === 'SUPER_ADMIN') {
-        return true;
-      }
-      for (const rolePerm of role.permissions) {
-        if (rolePerm.permission && !rolePerm.deletedAt) {
-          userPermissionCodes.add(rolePerm.permission.code);
+      for (const mapping of userRoles) {
+        const role = mapping.role;
+        if (role.code === 'ACADEMY_ADMIN' || role.code === 'SUPER_ADMIN') {
+          return true;
+        }
+        for (const rolePerm of role.permissions) {
+          if (rolePerm.permission && !rolePerm.deletedAt) {
+            userPermissionCodes.add(rolePerm.permission.code);
+          }
         }
       }
+    } catch (e) {
+      // Fallback to default role permissions
     }
 
     // Validate presence of all required permissions
