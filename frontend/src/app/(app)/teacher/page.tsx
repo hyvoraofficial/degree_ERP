@@ -793,7 +793,7 @@ export default function TeacherDashboard() {
                     }`}
                     disabled={!!selectedBatch}
                   >
-                    {s.name} ({s.code})
+                    {s.name}
                   </button>
                 ))}
               </div>
@@ -1197,7 +1197,7 @@ export default function TeacherDashboard() {
                       >
                         <option value="">Select Subject</option>
                         {Array.from(new Map([...subjects, ...(teacher?.teacherSubjects?.map((ts: any) => ts.subject).filter(Boolean) || [])].map((s: any) => [s.id, s])).values()).map((s: any) => (
-                          <option key={s.id} value={s.id}>{s.name} ({s.code || 'GENERAL'})</option>
+                          <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                       </select>
                     </div>
@@ -1327,7 +1327,7 @@ export default function TeacherDashboard() {
                       >
                         <option value="">Select Subject</option>
                         {subjects.map(s => (
-                          <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
+                          <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                       </select>
                     </div>

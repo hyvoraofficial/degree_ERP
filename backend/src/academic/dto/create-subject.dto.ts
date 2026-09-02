@@ -8,8 +8,8 @@ export enum SubjectType {
 }
 
 export class CreateSubjectDto {
-  @ApiProperty({ example: 'c1111111-1111-1111-1111-111111111111', description: 'Course UUID' })
-  @IsUUID()
+  @ApiProperty({ example: 'c1111111-1111-1111-1111-111111111111', description: 'Course ID or UUID' })
+  @IsString()
   @IsNotEmpty()
   courseId: string;
 
@@ -18,18 +18,18 @@ export class CreateSubjectDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'MATH-A10', description: 'Unique subject code' })
+  @ApiProperty({ example: 'MATH-A10', description: 'Subject code (optional)', required: false })
   @IsString()
-  @IsNotEmpty()
-  code: string;
+  @IsOptional()
+  code?: string;
 
   @ApiProperty({ example: 'algebra, linear equations and vectors', required: false })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ example: 'theory', enum: SubjectType })
+  @ApiProperty({ example: 'theory', enum: SubjectType, required: false })
   @IsEnum(SubjectType)
-  @IsNotEmpty()
-  subjectType: SubjectType;
+  @IsOptional()
+  subjectType?: SubjectType;
 }

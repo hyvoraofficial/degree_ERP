@@ -621,7 +621,6 @@ export default function StudentsPage() {
                           <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 last:border-0">
                             <div className="flex flex-col">
                               <span className="font-extrabold text-slate-950">{sub.name}</span>
-                              <span className="text-[10px] text-slate-500 font-mono font-bold">{sub.code}</span>
                             </div>
                             <div className="flex items-center gap-3">
                               <span className="text-xs font-bold text-slate-700">{sub.present || sub.presentCount || 0} / {sub.total || sub.totalSessions || 0} Sessions</span>

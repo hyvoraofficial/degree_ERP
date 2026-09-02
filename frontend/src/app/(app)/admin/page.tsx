@@ -210,10 +210,10 @@ export default function AdminDashboard() {
     if (!courseCode.trim()) errors.code = 'Course code is required';
     if (!courseBranchId) errors.branchId = 'Please select a target campus branch';
 
-    const filteredSubs = courseSubjects.filter(s => s.name.trim() && s.code.trim());
+    const filteredSubs = courseSubjects.filter(s => s.name.trim());
 
     if (filteredSubs.length === 0) {
-      errors.subjects = 'Please enter at least one Subject (Name & Code) for this course';
+      errors.subjects = 'Please enter at least one Subject Name for this course';
     }
 
     if (Object.keys(errors).length > 0) {
@@ -843,7 +843,7 @@ export default function AdminDashboard() {
                   {courseSubjects.map((sub, i) => (
                     <div key={i} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
                       <div className="grid grid-cols-12 gap-2 items-center">
-                        <div className="col-span-5">
+                        <div className="col-span-7">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Subject Name *</label>
                           <input
                             type="text"
@@ -854,16 +854,6 @@ export default function AdminDashboard() {
                           />
                         </div>
                         <div className="col-span-4">
-                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Subject Code *</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. PHY-101"
-                            value={sub.code}
-                            onChange={(e) => updateCourseSubjectField(i, 'code', e.target.value)}
-                            className="w-full h-9 px-3 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-primary"
-                          />
-                        </div>
-                        <div className="col-span-2">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Type</label>
                           <select
                             value={sub.subjectType}
@@ -1054,7 +1044,6 @@ export default function AdminDashboard() {
                           <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 last:border-0">
                             <div className="flex flex-col">
                               <span className="font-extrabold text-slate-950">{sub.name}</span>
-                              <span className="text-[10px] text-slate-500 font-mono font-bold">{sub.code}</span>
                             </div>
                             <div className="flex items-center gap-3">
                               <span className="text-xs font-bold text-slate-700">{sub.present || sub.presentCount || 0} / {sub.total || sub.totalSessions || 0} Sessions</span>

@@ -1189,7 +1189,7 @@ export default function TeachersAdminPage() {
                             className="w-full h-9 px-3 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-primary cursor-pointer"
                           >
                             {row.subjectsList.map(s => (
-                              <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
+                              <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
                           </select>
                         </div>

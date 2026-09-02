@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthToken, getSubdomain } from '@/config/api.config';
+import { API_BASE_URL, getAuthToken, getSubdomain, getApiErrorMessage } from '@/config/api.config';
 
 export interface Batch {
   id: string;
@@ -49,7 +49,7 @@ export const batchService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to create batch.');
+      throw new Error(getApiErrorMessage(body, 'Failed to create batch.'));
     }
     return body.data;
   },
@@ -93,7 +93,7 @@ export const batchService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to load batch details.');
+      throw new Error(getApiErrorMessage(body, 'Failed to load batch details.'));
     }
     return body.data;
   },
@@ -111,7 +111,7 @@ export const batchService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to update batch.');
+      throw new Error(getApiErrorMessage(body, 'Failed to update batch.'));
     }
     return body.data;
   },
@@ -127,7 +127,8 @@ export const batchService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to delete batch.');
+      throw new Error(getApiErrorMessage(body, 'Failed to delete batch.'));
     }
   },
 };
+

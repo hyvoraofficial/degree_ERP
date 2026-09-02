@@ -39,16 +39,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
       );
     }
 
+    // Format human-readable message from validation details if present
+    let displayMessage = errorMessage;
+    if (Array.isArray(errorDetails) && errorDetails.length > 0) {
+      displayMessage = errorDetails.join(', ');
+    } else if (typeof errorDetails === 'string' && errorDetails.trim()) {
+      displayMessage = errorDetails;
+    }
+
     // Log request failure context
     this.logger.warn(
-      `[${request.method}] ${request.url} - Status ${status} - Error: ${errorMessage}`
+      `[${request.method}] ${request.url} - Status ${status} - Error: ${displayMessage}`
     );
 
     response.status(status).json({
       success: false,
       error: {
         code: errorCode,
-        message: Array.isArray(errorDetails) ? 'Validation failed.' : errorMessage,
+        message: displayMessage,
         details: errorDetails,
       },
     });

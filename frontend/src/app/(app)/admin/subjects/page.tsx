@@ -42,7 +42,6 @@ export default function SubjectsPage() {
 
   // Form states - Create / Edit
   const [formName, setFormName] = React.useState('');
-  const [formCode, setFormCode] = React.useState('');
   const [formDescription, setFormDescription] = React.useState('');
   const [formCourseId, setFormCourseId] = React.useState('');
   const [formType, setFormType] = React.useState<'theory' | 'practical' | 'lab'>('theory');
@@ -93,8 +92,7 @@ export default function SubjectsPage() {
       if (search) {
         const query = search.toLowerCase();
         items = items.filter(s => 
-          s.name.toLowerCase().includes(query) || 
-          s.code.toLowerCase().includes(query)
+          s.name.toLowerCase().includes(query)
         );
       }
       setSubjects(items);
@@ -202,9 +200,8 @@ export default function SubjectsPage() {
 
   const handleOpenCreate = () => {
     setFormName('');
-    setFormCode('');
     setFormDescription('');
-    setFormCourseId(courses[0]?.id || '');
+    setFormCourseId(selectedCourseId || courses[0]?.id || '');
     setFormType('theory');
     setFormStatus('active');
     setIsCreateOpen(true);
@@ -213,7 +210,6 @@ export default function SubjectsPage() {
   const handleOpenEdit = (subject: Subject) => {
     setSelectedSubject(subject);
     setFormName(subject.name);
-    setFormCode(subject.code);
     setFormDescription(subject.description || '');
     setFormCourseId(subject.courseId);
     setFormType(subject.subjectType);
@@ -236,7 +232,6 @@ export default function SubjectsPage() {
     try {
       await subjectService.create({
         name: formName,
-        code: formCode,
         description: formDescription || undefined,
         subjectType: formType,
         courseId: formCourseId,
@@ -258,7 +253,6 @@ export default function SubjectsPage() {
     try {
       await subjectService.update(selectedSubject.id, {
         name: formName,
-        code: formCode,
         description: formDescription || undefined,
         subjectType: formType,
         courseId: formCourseId,
@@ -404,7 +398,7 @@ export default function SubjectsPage() {
                     <tr className="border-b border-slate-200 bg-slate-100 text-xs font-extrabold uppercase tracking-wider text-slate-900">
                       <th className="px-6 py-4">Subject</th>
                       <th className="px-6 py-4">Course Track</th>
-                      <th className="px-6 py-4">Subject Code</th>
+                      <th className="px-6 py-4">Type</th>
                       <th className="px-6 py-4">Status</th>
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
@@ -431,13 +425,9 @@ export default function SubjectsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenViewSubject(sub)}
-                            className="px-2 py-1 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-900 hover:text-indigo-600 text-xs rounded font-extrabold font-mono transition-colors cursor-pointer"
-                          >
-                            {sub.code}
-                          </button>
+                          <Badge variant="outline" className="capitalize font-bold text-xs bg-slate-50 text-slate-800 border-slate-300">
+                            {sub.subjectType || 'theory'}
+                          </Badge>
                         </td>
                         <td className="px-6 py-4">
                           <Badge variant={sub.status === 'active' ? 'success' : 'neutral'}>
@@ -525,7 +515,7 @@ export default function SubjectsPage() {
                 >
                   <option value="">Select Subject</option>
                   {assignSubjects.map(s => (
-                    <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
+                    <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
               </div>
@@ -633,7 +623,7 @@ export default function SubjectsPage() {
                   Subject Profile & Curriculum Sheet
                 </h3>
                 <p className="text-xs text-slate-600 font-extrabold uppercase tracking-wider mt-0.5">
-                  Code: {selectedSubject.code} &bull; {selectedSubject.course?.name || 'Academic Course'}
+                  {selectedSubject.course?.name || 'Academic Course'}
                 </p>
               </div>
               <button
@@ -666,8 +656,8 @@ export default function SubjectsPage() {
               {/* Subject Metadata */}
               <div className="grid grid-cols-2 gap-3 text-xs font-bold bg-white p-4 rounded-xl border border-slate-200 shadow-xs text-center">
                 <div className="p-2.5 bg-indigo-50 rounded-xl border border-indigo-200">
-                  <span className="text-indigo-700 block text-[10px] uppercase font-black">Subject Code</span>
-                  <span className="text-sm font-black text-indigo-950 font-mono">{selectedSubject.code}</span>
+                  <span className="text-indigo-700 block text-[10px] uppercase font-black">Subject Type</span>
+                  <span className="text-sm font-black text-indigo-950 capitalize">{selectedSubject.subjectType || 'Theory'}</span>
                 </div>
                 <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
                   <span className="text-emerald-700 block text-[10px] uppercase font-extrabold">Course Track</span>
@@ -681,7 +671,7 @@ export default function SubjectsPage() {
               <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl shadow-xs">
                 <div>
                   <span className="text-xs font-black text-slate-900 block">Edit or Modify Subject</span>
-                  <span className="text-[11px] font-bold text-slate-500">Update naming, code prefix, or track alignment.</span>
+                  <span className="text-[11px] font-bold text-slate-500">Update naming, subject type, or track alignment.</span>
                 </div>
                 <Button
                   size="sm"
@@ -726,14 +716,6 @@ export default function SubjectsPage() {
                 required
                 placeholder="e.g. Inorganic Chemistry"
               />
-              <Input
-                label="Subject Code *"
-                id="subCode"
-                value={formCode}
-                onChange={(e) => setFormCode(e.target.value)}
-                required
-                placeholder="e.g. CHEM-INORG"
-              />
 
               <div className="flex flex-col gap-1.5 w-full">
                 <label className="text-xs font-bold text-slate-700">Course Track *</label>
@@ -741,10 +723,25 @@ export default function SubjectsPage() {
                   value={formCourseId}
                   onChange={(e) => setFormCourseId(e.target.value)}
                   className="flex h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
+                  required
                 >
+                  <option value="" disabled>Select a course track...</option>
                   {courses.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="text-xs font-bold text-slate-700">Subject Type</label>
+                <select
+                  value={formType}
+                  onChange={(e) => setFormType(e.target.value as any)}
+                  className="flex h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
+                >
+                  <option value="theory">Theory</option>
+                  <option value="practical">Practical</option>
+                  <option value="lab">Lab</option>
                 </select>
               </div>
 
@@ -797,13 +794,19 @@ export default function SubjectsPage() {
                 onChange={(e) => setFormName(e.target.value)}
                 required
               />
-              <Input
-                label="Subject Code *"
-                id="subEditCode"
-                value={formCode}
-                onChange={(e) => setFormCode(e.target.value)}
-                required
-              />
+
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="text-xs font-bold text-slate-700">Subject Type</label>
+                <select
+                  value={formType}
+                  onChange={(e) => setFormType(e.target.value as any)}
+                  className="flex h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shadow-xs"
+                >
+                  <option value="theory">Theory</option>
+                  <option value="practical">Practical</option>
+                  <option value="lab">Lab</option>
+                </select>
+              </div>
 
               <div className="flex flex-col gap-1.5 w-full">
                 <label className="text-xs font-bold text-slate-700">Status</label>

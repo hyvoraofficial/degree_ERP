@@ -1,9 +1,9 @@
-import { API_BASE_URL, getAuthToken, getSubdomain } from '@/config/api.config';
+import { API_BASE_URL, getAuthToken, getSubdomain, getApiErrorMessage } from '@/config/api.config';
 
 export interface Subject {
   id: string;
   name: string;
-  code: string;
+  code?: string;
   description?: string;
   subjectType: 'theory' | 'practical' | 'lab';
   status: string;
@@ -42,7 +42,7 @@ export const subjectService = {
     return list;
   },
 
-  create: async (data: { name: string; code: string; description?: string; subjectType: string; courseId: string }): Promise<Subject> => {
+  create: async (data: { name: string; code?: string; description?: string; subjectType?: string; courseId: string }): Promise<Subject> => {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/academic/subjects`, {
       method: 'POST',
@@ -55,7 +55,7 @@ export const subjectService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to create subject.');
+      throw new Error(getApiErrorMessage(body, 'Failed to create subject.'));
     }
     return body.data;
   },
@@ -73,7 +73,7 @@ export const subjectService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to update subject.');
+      throw new Error(getApiErrorMessage(body, 'Failed to update subject.'));
     }
     return body.data;
   },
@@ -92,7 +92,7 @@ export const subjectService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to delete subject.');
+      throw new Error(getApiErrorMessage(body, 'Failed to delete subject.'));
     }
     return body.data;
   },
@@ -110,7 +110,7 @@ export const subjectService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to assign teacher to subject.');
+      throw new Error(getApiErrorMessage(body, 'Failed to assign teacher to subject.'));
     }
     return body.data;
   },
@@ -131,7 +131,7 @@ export const subjectService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to load assignments.');
+      throw new Error(getApiErrorMessage(body, 'Failed to load assignments.'));
     }
     return body.data || [];
   },
@@ -147,8 +147,9 @@ export const subjectService = {
     });
     const body = await response.json();
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Failed to remove assignment.');
+      throw new Error(getApiErrorMessage(body, 'Failed to remove assignment.'));
     }
     return body.data;
   },
 };
+

@@ -321,7 +321,7 @@ export default function StudentDashboard() {
               {courseSubjects.map(sub => (
                 <div key={sub.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
                   <span className="text-xs font-extrabold text-slate-900 block">{sub.name}</span>
-                  <span className="text-[11px] text-slate-600 font-mono font-semibold block">Code: {sub.code} • Type: {sub.subjectType}</span>
+                  <span className="text-[11px] text-slate-600 font-semibold capitalize block">Type: {sub.subjectType || 'Theory'}</span>
                 </div>
               ))}
             </div>

@@ -367,7 +367,7 @@ export default function AttendanceLogsPage() {
             >
               <option value="">All Curriculum Subjects</option>
               {subjects.map(s => (
-                <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
           </div>

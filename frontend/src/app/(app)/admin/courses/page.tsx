@@ -145,10 +145,10 @@ export default function CoursesPage() {
       toast('Validation Error', 'Please select a valid branch.', 'error');
       return;
     }
-    const filteredSubs = formSubjects.filter(s => s.name.trim() && s.code.trim());
+    const filteredSubs = formSubjects.filter(s => s.name.trim());
 
     if (filteredSubs.length === 0) {
-      toast('Validation Error', 'Please enter at least one subject (Subject Name and Code) for this course.', 'error');
+      toast('Validation Error', 'Please enter at least one subject for this course.', 'error');
       return;
     }
 
@@ -176,7 +176,7 @@ export default function CoursesPage() {
     e.preventDefault();
     if (!selectedCourse) return;
     
-    const filteredSubs = formSubjects.filter(s => s.name.trim() && s.code.trim());
+    const filteredSubs = formSubjects.filter(s => s.name.trim());
 
     if (filteredSubs.length === 0) {
       toast('Validation Error', 'A course must have at least one active subject.', 'error');
@@ -569,14 +569,9 @@ export default function CoursesPage() {
                     {viewCourseDetail.subjects.map((sub, idx) => (
                       <div key={sub.id || idx} className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-slate-950 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                              {sub.code}
-                            </span>
-                            <span className="text-sm font-extrabold text-slate-950">
-                              {sub.name}
-                            </span>
-                          </div>
+                          <span className="text-sm font-extrabold text-slate-950">
+                            {sub.name}
+                          </span>
                           {sub.description && (
                             <p className="text-xs text-slate-500 font-medium pl-0.5">
                               {sub.description}
@@ -698,7 +693,7 @@ export default function CoursesPage() {
                   {formSubjects.map((sub, i) => (
                     <div key={i} className="flex flex-col gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
                       <div className="grid grid-cols-12 gap-3 items-center">
-                        <div className="col-span-5">
+                        <div className="col-span-7">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Subject Name *</label>
                           <input
                             type="text"
@@ -710,17 +705,6 @@ export default function CoursesPage() {
                           />
                         </div>
                         <div className="col-span-3">
-                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Subject Code *</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. PHY-101"
-                            value={sub.code}
-                            onChange={(e) => updateSubjectField(i, 'code', e.target.value)}
-                            className="w-full h-9 px-3 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-primary"
-                            required
-                          />
-                        </div>
-                        <div className="col-span-2">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Type</label>
                           <select
                             value={sub.subjectType}
@@ -873,7 +857,7 @@ export default function CoursesPage() {
                   {formSubjects.filter(s => s.status !== 'deleted').map((sub, i) => (
                     <div key={i} className="flex flex-col gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
                       <div className="grid grid-cols-12 gap-3 items-center">
-                        <div className="col-span-5">
+                        <div className="col-span-7">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Subject Name *</label>
                           <input
                             type="text"
@@ -885,17 +869,6 @@ export default function CoursesPage() {
                           />
                         </div>
                         <div className="col-span-3">
-                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Subject Code *</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. PHY-101"
-                            value={sub.code}
-                            onChange={(e) => updateSubjectField(i, 'code', e.target.value)}
-                            className="w-full h-9 px-3 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-primary"
-                            required
-                          />
-                        </div>
-                        <div className="col-span-2">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block mb-1">Type</label>
                           <select
                             value={sub.subjectType}

@@ -70,3 +70,35 @@ export function getAuthHeaders(): Record<string, string> {
   }
   return headers;
 }
+
+export function getApiErrorMessage(body: any, fallback: string = 'An unexpected error occurred.'): string {
+  if (!body) return fallback;
+
+  if (body.error?.details) {
+    if (Array.isArray(body.error.details) && body.error.details.length > 0) {
+      return body.error.details.join(', ');
+    }
+    if (typeof body.error.details === 'object') {
+      const msgs = Object.values(body.error.details).flat().filter(Boolean);
+      if (msgs.length > 0) return msgs.join(', ');
+    }
+    if (typeof body.error.details === 'string' && body.error.details.trim()) {
+      return body.error.details;
+    }
+  }
+
+  if (body.error?.message && body.error.message !== 'Validation failed.') {
+    return body.error.message;
+  }
+
+  if (Array.isArray(body.message) && body.message.length > 0) {
+    return body.message.join(', ');
+  }
+
+  if (typeof body.message === 'string' && body.message.trim() && body.message !== 'Validation failed.') {
+    return body.message;
+  }
+
+  return body.error?.message || body.message || fallback;
+}
+

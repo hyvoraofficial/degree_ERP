@@ -51,27 +51,22 @@ export class AcademicService {
 
       if (dto.subjects && dto.subjects.length > 0) {
         for (const sub of dto.subjects) {
-          const subCodeExists = await tx.subject.findFirst({
-            where: { courseId: course.id, code: sub.code.toUpperCase(), deletedAt: null },
-          });
-          if (subCodeExists) {
-            throw new BadRequestException(`Subject code "${sub.code}" is already defined in this course.`);
-          }
           const subNameExists = await tx.subject.findFirst({
             where: { courseId: course.id, name: sub.name, deletedAt: null },
           });
           if (subNameExists) {
-            throw new BadRequestException(`Subject name "${sub.name}" already exists in this course.`);
+            throw new BadRequestException(`Subject "${sub.name}" is already defined in this course.`);
           }
+          const subCode = (sub.code || sub.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase() || 'SUB').slice(0, 50);
 
           await tx.subject.create({
             data: {
               academyId,
               courseId: course.id,
               name: sub.name,
-              code: sub.code.toUpperCase(),
+              code: subCode,
               description: sub.description,
-              subjectType: sub.subjectType,
+              subjectType: sub.subjectType || 'theory',
               status: sub.status || 'active',
             },
           });
@@ -156,7 +151,15 @@ export class AcademicService {
 
   async findOneCourse(academyId: string, id: string) {
     const course = await this.prisma.course.findFirst({
-      where: { id, academyId, deletedAt: null },
+      where: {
+        academyId,
+        deletedAt: null,
+        OR: [
+          { id },
+          { name: { equals: id, mode: 'insensitive' } },
+          { code: { equals: id, mode: 'insensitive' } },
+        ],
+      },
       include: {
         subjects: { where: { deletedAt: null } },
         branch: true,
@@ -164,7 +167,7 @@ export class AcademicService {
     });
 
     if (!course) {
-      throw new NotFoundException(`Course with ID "${id}" not found.`);
+      throw new NotFoundException(`Course with ID or name "${id}" not found.`);
     }
 
     return course;
@@ -261,56 +264,45 @@ export class AcademicService {
                 data: { deletedAt: new Date() },
               });
             } else {
-              if (sub.code) {
-                const subCodeExists = await tx.subject.findFirst({
-                  where: { courseId: id, code: sub.code.toUpperCase(), deletedAt: null, NOT: { id: sub.id } },
-                });
-                if (subCodeExists) {
-                  throw new BadRequestException(`Subject code "${sub.code}" is already defined in this course.`);
-                }
-              }
               if (sub.name) {
                 const subNameExists = await tx.subject.findFirst({
                   where: { courseId: id, name: sub.name, deletedAt: null, NOT: { id: sub.id } },
                 });
                 if (subNameExists) {
-                  throw new BadRequestException(`Subject name "${sub.name}" already exists in this course.`);
+                  throw new BadRequestException(`Subject "${sub.name}" already exists in this course.`);
                 }
               }
+
+              const subCode = sub.code ? sub.code.toUpperCase() : (sub.name ? sub.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase().slice(0, 50) : undefined);
 
               await tx.subject.update({
                 where: { id: sub.id },
                 data: {
                   name: sub.name,
-                  code: sub.code.toUpperCase(),
+                  code: subCode,
                   description: sub.description,
-                  subjectType: sub.subjectType,
+                  subjectType: sub.subjectType || 'theory',
                   status: sub.status || 'active',
                 },
               });
             }
           } else {
-            const subCodeExists = await tx.subject.findFirst({
-              where: { courseId: id, code: sub.code.toUpperCase(), deletedAt: null },
-            });
-            if (subCodeExists) {
-              throw new BadRequestException(`Subject code "${sub.code}" is already defined in this course.`);
-            }
             const subNameExists = await tx.subject.findFirst({
               where: { courseId: id, name: sub.name, deletedAt: null },
             });
             if (subNameExists) {
-              throw new BadRequestException(`Subject name "${sub.name}" already exists in this course.`);
+              throw new BadRequestException(`Subject "${sub.name}" already exists in this course.`);
             }
+            const subCode = (sub.code || sub.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase() || 'SUB').slice(0, 50);
 
             await tx.subject.create({
               data: {
                 academyId,
                 courseId: id,
                 name: sub.name,
-                code: sub.code.toUpperCase(),
+                code: subCode,
                 description: sub.description,
-                subjectType: sub.subjectType,
+                subjectType: sub.subjectType || 'theory',
                 status: sub.status || 'active',
               },
             });
@@ -370,21 +362,23 @@ export class AcademicService {
   async createSubject(academyId: string, dto: CreateSubjectDto) {
     const course = await this.findOneCourse(academyId, dto.courseId);
 
-    const codeExists = await this.prisma.subject.findFirst({
-      where: { courseId: course.id, code: dto.code, deletedAt: null },
+    const nameExists = await this.prisma.subject.findFirst({
+      where: { courseId: course.id, name: dto.name, deletedAt: null },
     });
-    if (codeExists) {
-      throw new BadRequestException(`Subject code "${dto.code}" is already defined under this course.`);
+    if (nameExists) {
+      throw new BadRequestException(`Subject "${dto.name}" is already defined under this course.`);
     }
+
+    const code = (dto.code || dto.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase() || 'SUB').slice(0, 50);
 
     return this.prisma.subject.create({
       data: {
         academyId,
         courseId: course.id,
         name: dto.name,
-        code: dto.code.toUpperCase(),
+        code,
         description: dto.description,
-        subjectType: dto.subjectType,
+        subjectType: dto.subjectType || 'theory',
         status: (dto as any).status || 'active',
       },
     });
@@ -399,10 +393,7 @@ export class AcademicService {
       where.courseId = courseId;
     }
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } },
-      ];
+      where.name = { contains: search, mode: 'insensitive' };
     }
     return this.prisma.subject.findMany({
       where,
@@ -455,29 +446,22 @@ export class AcademicService {
   async updateSubject(academyId: string, id: string, dto: Partial<CreateSubjectDto> & { status?: string }) {
     const subject = await this.findOneSubject(academyId, id);
 
-    if (dto.code && dto.code !== subject.code) {
-      const codeExists = await this.prisma.subject.findFirst({
-        where: { courseId: subject.courseId, code: dto.code.toUpperCase(), deletedAt: null, NOT: { id } },
-      });
-      if (codeExists) {
-        throw new BadRequestException(`Subject code "${dto.code}" is already defined under this course.`);
-      }
-    }
-
     if (dto.name && dto.name !== subject.name) {
       const nameExists = await this.prisma.subject.findFirst({
         where: { courseId: subject.courseId, name: dto.name, deletedAt: null, NOT: { id } },
       });
       if (nameExists) {
-        throw new BadRequestException(`Subject name "${dto.name}" already exists under this course.`);
+        throw new BadRequestException(`Subject "${dto.name}" already exists under this course.`);
       }
     }
+
+    const codeToUpdate = dto.code ? dto.code.toUpperCase() : (dto.name ? dto.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase().slice(0, 50) : undefined);
 
     return this.prisma.subject.update({
       where: { id },
       data: {
         name: dto.name,
-        code: dto.code ? dto.code.toUpperCase() : undefined,
+        code: codeToUpdate,
         description: dto.description,
         subjectType: dto.subjectType,
         status: dto.status,
