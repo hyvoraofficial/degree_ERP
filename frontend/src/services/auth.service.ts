@@ -33,18 +33,37 @@ export const authService = {
   login: async (email: string, password: string, role: UserRole): Promise<LoginResponse> => {
     const subdomain = getSubdomain();
     
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Academy-Subdomain': subdomain,
-      },
-      body: JSON.stringify({ email, password, role }),
-    });
+    let response: Response;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-    const body = await response.json();
+      response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Academy-Subdomain': subdomain,
+        },
+        body: JSON.stringify({ email, password, role }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+    } catch (netErr: any) {
+      if (netErr.name === 'AbortError') {
+        throw new Error(`Authentication request timed out. Could not reach backend API at ${API_BASE_URL}`);
+      }
+      throw new Error(`Cannot connect to backend server (${API_BASE_URL}). Please verify your backend deployment URL and network connection.`);
+    }
+
+    let body: any;
+    try {
+      body = await response.json();
+    } catch (e) {
+      throw new Error(`Invalid server response received from ${API_BASE_URL}`);
+    }
+
     if (!response.ok || !body.success) {
-      throw new Error(body.error?.message || 'Invalid email or password.');
+      throw new Error(body.error?.message || body.message || 'Invalid email or password.');
     }
 
     const { tokens, user } = body.data;
