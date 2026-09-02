@@ -26,7 +26,7 @@ export default function LandingPage() {
             {settings?.name?.substring(0, 1) || 'H'}
           </div>
           <span className="font-black text-lg tracking-tight text-slate-950">
-            {settings?.name ? `${settings.name} EduERP` : 'HYVORA EduERP'}
+            HYVORA EduERP
           </span>
         </div>
 
