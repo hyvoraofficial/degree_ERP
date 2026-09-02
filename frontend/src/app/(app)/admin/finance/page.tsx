@@ -211,12 +211,12 @@ export default function FinancePage() {
   const totalPaid = allocations.reduce((sum, item) => sum + Number(item.paidAmount), 0);
 
   return (
-    <div className="p-8 space-y-6 select-none">
+    <div className="space-y-6 select-none">
       
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950">
             Fee Structures & Ledger Management
           </h1>
           <p className="text-xs font-extrabold text-slate-600 mt-1">

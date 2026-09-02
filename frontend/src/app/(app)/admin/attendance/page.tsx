@@ -245,13 +245,13 @@ export default function AttendanceLogsPage() {
   const currentBranch = branches.find(b => b.id === branchId);
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto select-none">
+    <div className="space-y-6 max-w-7xl mx-auto select-none">
       
       {/* Page Title Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
               Attendance Logs & Register
             </h1>
             <Badge variant="info" className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase">
@@ -264,12 +264,12 @@ export default function AttendanceLogsPage() {
         </div>
 
         {/* Global Save Button */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Button 
             variant="secondary" 
             onClick={fetchAttendanceRegister}
             disabled={isLoadingStudents}
-            className="h-10 text-xs font-bold gap-1.5 bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200"
+            className="h-10 text-xs font-bold gap-1.5 bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoadingStudents ? 'animate-spin' : ''}`} /> Refresh
           </Button>
@@ -277,7 +277,7 @@ export default function AttendanceLogsPage() {
           <Button 
             onClick={handleSaveRegister}
             disabled={isSaving || students.length === 0}
-            className="h-10 text-xs font-bold gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+            className="h-10 text-xs font-bold gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm cursor-pointer"
           >
             <Save className="w-4 h-4" />
             {isSaving ? 'Saving...' : 'Save Attendance Register'}

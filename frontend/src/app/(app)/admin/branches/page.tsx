@@ -165,15 +165,15 @@ export default function BranchesPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
             Branch Directory
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-500 mt-1">
             Manage multi-location branch facilities, managers, and activation logs.
           </p>
         </div>

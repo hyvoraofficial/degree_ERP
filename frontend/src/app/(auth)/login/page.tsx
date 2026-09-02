@@ -132,8 +132,8 @@ function LoginFormContent() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-12 select-none">
-      <div className="w-full max-w-md space-y-6 bg-white border border-slate-200/80 p-8 rounded-3xl shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-8 sm:px-6 sm:py-12 select-none">
+      <div className="w-full max-w-md space-y-6 bg-white border border-slate-200/80 p-5 sm:p-8 rounded-3xl shadow-2xl">
         
         {/* Header branding */}
         <div className="text-center space-y-2">

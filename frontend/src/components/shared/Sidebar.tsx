@@ -10,7 +10,12 @@ import { useTenantStore } from '@/store/useTenantStore';
 import { authService } from '@/services/auth.service';
 import { NAVIGATION_ITEMS } from '@/config/navigation';
 
-export function Sidebar() {
+export interface SidebarProps {
+  onClose?: () => void;
+  isMobileDrawer?: boolean;
+}
+
+export function Sidebar({ onClose, isMobileDrawer = false }: SidebarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const { role, user, token, logout } = useAuthStore();
@@ -26,6 +31,7 @@ export function Sidebar() {
   };
   
   const handleLogout = async () => {
+    if (onClose) onClose();
     if (token) {
       await authService.logout(token).catch(() => {});
     }
@@ -37,23 +43,34 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col h-screen sticky top-0 shrink-0 select-none shadow-xs">
+    <aside className={`w-64 border-r border-slate-200 bg-white flex flex-col h-screen shrink-0 select-none shadow-xs ${isMobileDrawer ? 'relative' : 'sticky top-0'}`}>
       {/* Academy Logo / Academic Admin Portal Header */}
-      <div className="h-16 border-b border-slate-200 flex items-center gap-3 px-4 shrink-0 bg-slate-50/80">
-        <div 
-          className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-base shadow-xs shrink-0"
-          style={{ backgroundColor: settings?.primaryColor }}
-        >
-          {settings?.name?.substring(0, 1) || 'H'}
+      <div className="h-16 border-b border-slate-200 flex items-center justify-between px-4 shrink-0 bg-slate-50/80">
+        <div className="flex items-center gap-3 min-w-0">
+          <div 
+            className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-base shadow-xs shrink-0"
+            style={{ backgroundColor: settings?.primaryColor }}
+          >
+            {settings?.name?.substring(0, 1) || 'H'}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-extrabold text-sm truncate text-slate-900 leading-tight">
+              {settings?.name || 'HYVORA'}
+            </span>
+            <span className="inline-flex items-center text-[9px] font-black text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full uppercase tracking-wider w-fit mt-0.5">
+              {getPortalLabel()}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col min-w-0">
-          <span className="font-extrabold text-sm truncate text-slate-900 leading-tight">
-            {settings?.name || 'HYVORA'}
-          </span>
-          <span className="inline-flex items-center text-[9px] font-black text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full uppercase tracking-wider w-fit mt-0.5">
-            {getPortalLabel()}
-          </span>
-        </div>
+        {isMobileDrawer && onClose && (
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 transition-colors lg:hidden cursor-pointer"
+            aria-label="Close menu"
+          >
+            <LucideIcons.X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation menu list */}
@@ -68,6 +85,9 @@ export function Sidebar() {
             <Link
               key={`${item.href}-${idx}`}
               href={item.href}
+              onClick={() => {
+                if (onClose) onClose();
+              }}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
                   ? 'bg-primary/10 text-primary border border-primary/20 shadow-xs'

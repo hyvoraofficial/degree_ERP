@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Sun, Moon, Bell, Plus, MapPin, X, Edit, ChevronDown, UserPlus, Check } from 'lucide-react';
+import { Sun, Moon, Bell, Plus, MapPin, X, Edit, ChevronDown, UserPlus, Check, Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useBranchContext } from '@/providers/BranchProvider';
@@ -13,7 +13,11 @@ import { Card } from '@/components/ui/Card';
 import { useToast } from '@/providers/ToastProvider';
 import { isValidEmail, isValidPhone, parseFieldErrors } from '@/utils/validation';
 
-export function Navbar() {
+export interface NavbarProps {
+  onMenuClick?: () => void;
+}
+
+export function Navbar({ onMenuClick }: NavbarProps = {}) {
   const { theme, setTheme } = useTheme();
   const { user, role } = useAuthStore();
   const { toast } = useToast();
@@ -99,95 +103,112 @@ export function Navbar() {
 
   return (
     <>
-      <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8 shrink-0 select-none shadow-xs">
-        {/* Global Branch Selector Dropdown & New Branch Button */}
-        {isAcademyAdmin && (
-          <div className="flex items-center gap-3">
-            <div className="relative" ref={branchDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-300 hover:border-slate-400 px-3.5 py-2 rounded-xl shadow-xs transition-all cursor-pointer font-black text-xs text-slate-900"
-              >
-                <MapPin className="w-4 h-4 text-primary shrink-0" />
-                <span className="hidden sm:inline text-slate-600 font-bold">Active Branch:</span>
-                <span className="font-extrabold text-slate-950">
-                  {branches.find(b => b.id === selectedBranchId)?.name || 'All Branches'}
-                </span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isBranchDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isBranchDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-60 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                    Select Active Campus Branch
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedBranchId('');
-                      setIsBranchDropdownOpen(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${
-                      !selectedBranchId ? 'text-primary bg-primary/5 font-black' : 'text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>All Branches</span>
-                    {!selectedBranchId && <Check className="w-4 h-4 text-primary shrink-0" />}
-                  </button>
-                  
-                  <div className="my-1 border-t border-slate-100 dark:border-zinc-800" />
-
-                  {branches.map((b) => {
-                    const isSelected = b.id === selectedBranchId;
-                    return (
-                      <button
-                        key={b.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedBranchId(b.id);
-                          setIsBranchDropdownOpen(false);
-                        }}
-                        className={`w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${
-                          isSelected ? 'text-primary bg-primary/5 font-black' : 'text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-extrabold">{b.name}</span>
-                          <span className="text-[10px] text-slate-400 font-mono font-semibold">{b.code}</span>
-                        </div>
-                        {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <Button
-              onClick={() => { setFieldErrors({}); setIsNewBranchModalOpen(true); }}
-              className="h-9 px-3 text-xs gap-1.5 font-black shrink-0 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xs cursor-pointer"
+      <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-3 sm:px-6 lg:px-8 shrink-0 select-none shadow-xs gap-2">
+        {/* Left Side: Mobile Hamburger Menu & Global Branch Selector */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile Hamburger Toggle (hidden on lg desktop) */}
+          {onMenuClick && (
+            <button
+              type="button"
+              onClick={onMenuClick}
+              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 lg:hidden cursor-pointer shrink-0 transition-colors"
+              aria-label="Open navigation menu"
+              title="Open menu"
             >
-              <Plus className="w-3.5 h-3.5" /> New Branch
-            </Button>
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
 
-            <Link href="/admin/branches">
+          {isAcademyAdmin && (
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="relative" ref={branchDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+                  className="flex items-center gap-1.5 sm:gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-300 hover:border-slate-400 px-2.5 sm:px-3.5 py-2 rounded-xl shadow-xs transition-all cursor-pointer font-black text-xs text-slate-900"
+                >
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span className="hidden sm:inline text-slate-600 font-bold">Active Branch:</span>
+                  <span className="font-extrabold text-slate-950 truncate max-w-[90px] sm:max-w-none">
+                    {branches.find(b => b.id === selectedBranchId)?.name || 'All Branches'}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform shrink-0 ${isBranchDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isBranchDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-60 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                      Select Active Campus Branch
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedBranchId('');
+                        setIsBranchDropdownOpen(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${
+                        !selectedBranchId ? 'text-primary bg-primary/5 font-black' : 'text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <span>All Branches</span>
+                      {!selectedBranchId && <Check className="w-4 h-4 text-primary shrink-0" />}
+                    </button>
+                    
+                    <div className="my-1 border-t border-slate-100 dark:border-zinc-800" />
+
+                    {branches.map((b) => {
+                      const isSelected = b.id === selectedBranchId;
+                      return (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedBranchId(b.id);
+                            setIsBranchDropdownOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${
+                            isSelected ? 'text-primary bg-primary/5 font-black' : 'text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-extrabold">{b.name}</span>
+                            <span className="text-[10px] text-slate-400 font-mono font-semibold">{b.code}</span>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               <Button
-                variant="secondary"
-                className="h-9 px-3 text-xs gap-1.5 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl shadow-xs cursor-pointer"
+                onClick={() => { setFieldErrors({}); setIsNewBranchModalOpen(true); }}
+                className="h-9 px-2.5 sm:px-3 text-xs gap-1 sm:gap-1.5 font-black shrink-0 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xs cursor-pointer"
+                title="New Branch"
               >
-                <Edit className="w-3.5 h-3.5 text-slate-700" /> Edit Branches
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">New Branch</span>
               </Button>
-            </Link>
-          </div>
-        )}
+
+              <Link href="/admin/branches" className="hidden md:inline-flex">
+                <Button
+                  variant="secondary"
+                  className="h-9 px-3 text-xs gap-1.5 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl shadow-xs cursor-pointer"
+                >
+                  <Edit className="w-3.5 h-3.5 text-slate-700" /> Edit Branches
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Control panel: New Admission, Notifications, Theme toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {isAcademyAdmin && (
-            <Link href="/admin/admissions">
-              <Button className="h-9 px-4 text-xs gap-1.5 font-black shrink-0 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xs cursor-pointer">
-                <UserPlus className="w-4 h-4" /> New Admission
+            <Link href="/admin/admissions" className="hidden sm:inline-flex">
+              <Button className="h-9 px-3 sm:px-4 text-xs gap-1.5 font-black shrink-0 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xs cursor-pointer">
+                <UserPlus className="w-4 h-4" /> <span className="hidden md:inline">New Admission</span>
               </Button>
             </Link>
           )}
@@ -207,8 +228,8 @@ export function Navbar() {
           </button>
 
           {/* Active Profile Info */}
-          <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center border border-primary/30 uppercase">
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center border border-primary/30 uppercase shrink-0">
               {user?.firstName ? user.firstName.substring(0, 1) : 'U'}
             </div>
             <div className="flex flex-col hidden md:flex">

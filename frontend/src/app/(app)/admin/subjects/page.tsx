@@ -284,12 +284,12 @@ export default function SubjectsPage() {
   };
 
   return (
-    <div className="p-8 space-y-6 select-none">
+    <div className="space-y-6 select-none">
       
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950">
             Subject Catalog & Teacher Assignments
           </h1>
           <p className="text-xs font-extrabold text-slate-600 mt-1">
@@ -297,11 +297,11 @@ export default function SubjectsPage() {
           </p>
         </div>
         
-        <div className="flex gap-3 items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="flex p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-2xs">
             <button
               onClick={() => setActiveTab('CATALOG')}
-              className={`px-4 py-2 text-xs font-black rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs font-black rounded-lg transition-all cursor-pointer text-center ${
                 activeTab === 'CATALOG'
                   ? 'bg-white text-slate-950 shadow-xs border border-slate-200'
                   : 'text-slate-600 hover:text-slate-950'
@@ -311,7 +311,7 @@ export default function SubjectsPage() {
             </button>
             <button
               onClick={() => setActiveTab('ASSIGNMENTS')}
-              className={`px-4 py-2 text-xs font-black rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs font-black rounded-lg transition-all cursor-pointer text-center ${
                 activeTab === 'ASSIGNMENTS'
                   ? 'bg-white text-slate-950 shadow-xs border border-slate-200'
                   : 'text-slate-600 hover:text-slate-950'
@@ -616,7 +616,7 @@ export default function SubjectsPage() {
       {/* VIEW SUBJECT DETAILS DRAWER */}
       {isViewSubjectOpen && selectedSubject && (
         <div className="fixed inset-0 z-50 bg-black/40 flex justify-end backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
+          <div className="w-full max-w-full sm:max-w-xl md:max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-4 sm:p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
               <div>
                 <h3 className="text-lg font-black text-slate-950">
@@ -693,7 +693,7 @@ export default function SubjectsPage() {
       {/* CREATE SUBJECT MODAL */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 backdrop-blur-xs overflow-y-auto">
-          <Card className="w-full max-w-md p-6 relative border border-slate-200 bg-white shadow-2xl rounded-3xl space-y-4">
+          <Card className="w-full max-w-md p-4 sm:p-6 relative border border-slate-200 bg-white shadow-2xl rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsCreateOpen(false)}
               className="absolute top-4 right-4 p-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -772,7 +772,7 @@ export default function SubjectsPage() {
       {/* EDIT SUBJECT MODAL */}
       {isEditOpen && selectedSubject && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 backdrop-blur-xs overflow-y-auto">
-          <Card className="w-full max-w-md p-6 relative border border-slate-200 bg-white shadow-2xl rounded-3xl space-y-4">
+          <Card className="w-full max-w-md p-4 sm:p-6 relative border border-slate-200 bg-white shadow-2xl rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsEditOpen(false)}
               className="absolute top-4 right-4 p-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"

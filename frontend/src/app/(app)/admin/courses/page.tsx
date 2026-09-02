@@ -282,12 +282,12 @@ export default function CoursesPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-8 space-y-6 select-none">
+    <div className="space-y-6 select-none">
       
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950">
             Course Management & Curriculum Syllabus
           </h1>
           <p className="text-xs text-slate-600 font-extrabold mt-1">
@@ -488,7 +488,7 @@ export default function CoursesPage() {
       {/* VIEW SYLLABUS & SUBJECTS DRAWER */}
       {isViewSyllabusOpen && viewCourseDetail && (
         <div className="fixed inset-0 z-50 bg-black/40 flex justify-end backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
+          <div className="w-full max-w-full sm:max-w-xl md:max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-4 sm:p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
               <div>
                 <h3 className="text-lg font-black text-slate-950">
@@ -556,7 +556,7 @@ export default function CoursesPage() {
                       setIsViewSyllabusOpen(false);
                       handleOpenEditModal(viewCourseDetail);
                     }}
-                    className="h-8 text-xs gap-1.5 font-bold"
+                    className="h-8 text-xs gap-1.5 font-bold cursor-pointer"
                   >
                     <Edit2 className="w-3.5 h-3.5" /> Edit Syllabus
                   </Button>
@@ -599,7 +599,7 @@ export default function CoursesPage() {
       {/* CREATE MODAL */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 backdrop-blur-xs overflow-y-auto">
-          <Card className="w-full max-w-2xl p-6 relative border border-slate-200 bg-white shadow-2xl my-8 max-h-[90vh] overflow-y-auto scrollbar-thin rounded-3xl space-y-4">
+          <Card className="w-full max-w-2xl p-4 sm:p-6 relative border border-slate-200 bg-white shadow-2xl rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsCreateModalOpen(false)}
               className="absolute top-4 right-4 p-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -766,7 +766,7 @@ export default function CoursesPage() {
       {/* EDIT MODAL */}
       {isEditModalOpen && selectedCourse && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 backdrop-blur-xs overflow-y-auto">
-          <Card className="w-full max-w-2xl p-6 relative border border-slate-200 bg-white shadow-2xl my-8 max-h-[90vh] overflow-y-auto scrollbar-thin rounded-3xl space-y-4">
+          <Card className="w-full max-w-2xl p-4 sm:p-6 relative border border-slate-200 bg-white shadow-2xl rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsEditModalOpen(false)}
               className="absolute top-4 right-4 p-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"

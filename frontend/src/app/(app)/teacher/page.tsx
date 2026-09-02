@@ -531,25 +531,25 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in select-none">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in select-none">
       
       {/* Header welcome banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             Welcome back, {teacher?.user?.firstName || 'Faculty Member'}!
           </h1>
-          <p className="text-sm text-zinc-400 font-semibold mt-0.5">
+          <p className="text-xs sm:text-sm text-zinc-400 font-semibold mt-0.5">
             Employee Code: {teacher?.employeeNumber || 'TCH-001'} • Designation: {teacher?.designation || 'Lecturer'}
           </p>
         </div>
-        <Button variant="secondary" onClick={fetchTeacherProfile} className="h-10 gap-1.5 shrink-0">
+        <Button variant="secondary" onClick={fetchTeacherProfile} className="h-10 gap-1.5 shrink-0 cursor-pointer">
           <RefreshCw className="w-4 h-4" /> Refresh Portal
         </Button>
       </div>
 
       {/* Tabs navigation bar */}
-      <div className="flex flex-wrap gap-2 border-b border-border pb-1">
+      <div className="flex flex-nowrap sm:flex-wrap gap-2 border-b border-border pb-2 overflow-x-auto scrollbar-none">
         {[
           { id: 'DASHBOARD', label: 'Overview', icon: <ClipboardList className="w-4 h-4" /> },
           { id: 'STUDENTS', label: 'Students Roster', icon: <Users className="w-4 h-4" /> },
@@ -563,7 +563,7 @@ export default function TeacherDashboard() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as TeacherTab)}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === tab.id 
                 ? 'border-primary bg-primary/5 text-primary' 
                 : 'border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
@@ -1027,7 +1027,7 @@ export default function TeacherDashboard() {
           {/* ADD MATERIAL MODAL */}
           {isUploadModalOpen && (
             <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 backdrop-blur-xs">
-              <Card className="w-full max-w-lg p-6 relative border border-border shadow-xl space-y-5 max-h-[90vh] overflow-y-auto">
+              <Card className="w-full max-w-lg p-4 sm:p-6 relative border border-border shadow-xl space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center border-b border-border pb-3">
                   <div>
                     <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Upload Study Material</h3>
@@ -1289,7 +1289,7 @@ export default function TeacherDashboard() {
           {/* Modal: Create Assignment */}
           {isAssignmentModalOpen && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-              <Card className="w-full max-w-lg p-6 space-y-5 bg-card border border-border shadow-2xl animate-in fade-in zoom-in-95">
+              <Card className="w-full max-w-lg p-4 sm:p-6 space-y-4 sm:space-y-5 bg-card border border-border shadow-2xl animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center border-b border-border pb-3">
                   <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Publish New Assignment</h3>
                   <button onClick={() => setIsAssignmentModalOpen(false)} className="text-zinc-400 hover:text-zinc-600">

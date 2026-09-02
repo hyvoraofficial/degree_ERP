@@ -262,12 +262,12 @@ export default function StudentsPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
 
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950">
             Student Management
           </h1>
           <p className="text-xs text-slate-600 font-extrabold mt-1">
@@ -510,7 +510,7 @@ export default function StudentsPage() {
       {/* DETAIL DRAWER / SLIDE-OUT OVERLAY */}
       {isDetailDrawerOpen && selectedStudent && (
         <div className="fixed inset-0 z-50 bg-black/40 flex justify-end backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
+          <div className="w-full max-w-full sm:max-w-xl md:max-w-2xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl p-4 sm:p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
               <div>
                 <h3 className="text-lg font-black text-slate-950">

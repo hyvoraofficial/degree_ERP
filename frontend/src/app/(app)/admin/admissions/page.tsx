@@ -344,21 +344,21 @@ export default function AdmissionsPage() {
   );
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6 select-none">
+    <div className="space-y-6 max-w-4xl mx-auto select-none">
       
       {/* Page Title */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
           New Admission Registration
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-xs sm:text-sm text-zinc-500 mt-1">
           Admit new student profiles, provision login credentials, and configure operational billing settings.
         </p>
       </div>
 
       {/* Progress Step Bar */}
       {step !== 'SUCCESS' && (
-        <div className="grid grid-cols-6 gap-2 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-400 select-none">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-400 select-none">
           <button onClick={() => setStep('BRANCH')} className={`pb-2 border-b-2 transition-colors ${step === 'BRANCH' ? 'border-primary text-primary' : 'border-zinc-200'}`}>1. Branch</button>
           <button onClick={() => selectedBranch && setStep('COURSE')} className={`pb-2 border-b-2 transition-colors ${step === 'COURSE' ? 'border-primary text-primary' : 'border-zinc-200'}`}>2. Course</button>
           <button onClick={() => selectedCourse && setStep('BATCH')} className={`pb-2 border-b-2 transition-colors ${step === 'BATCH' ? 'border-primary text-primary' : 'border-zinc-200'}`}>3. Batch</button>
