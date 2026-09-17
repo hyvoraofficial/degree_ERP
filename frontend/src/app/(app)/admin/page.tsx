@@ -762,9 +762,9 @@ export default function AdminDashboard() {
 
             <form onSubmit={handleCreateCourse} className="space-y-4" noValidate>
               <Input
-                label="Course Name *"
+                label="Program Name *"
                 id="cName"
-                placeholder="e.g. JEE Masterclass 2026"
+                placeholder="e.g. B.Tech Computer Science & Engineering"
                 value={courseName}
                 onChange={(e) => { setCourseName(e.target.value); setCourseFieldErrors(prev => ({ ...prev, name: '' })); }}
                 error={courseFieldErrors.name}
@@ -772,9 +772,9 @@ export default function AdminDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="Course Code *"
+                  label="Program Code *"
                   id="cCode"
-                  placeholder="e.g. JEE-2026"
+                  placeholder="e.g. BTECH-CSE"
                   value={courseCode}
                   onChange={(e) => { setCourseCode(e.target.value); setCourseFieldErrors(prev => ({ ...prev, code: '' })); }}
                   error={courseFieldErrors.code}

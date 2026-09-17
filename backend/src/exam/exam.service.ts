@@ -135,6 +135,30 @@ export class ExamService {
     });
   }
 
+  async findPapersBySubject(academyId: string, subjectId: string) {
+    return this.prisma.examPaper.findMany({
+      where: { academyId, subjectId, deletedAt: null },
+      include: {
+        exam: true,
+        subject: true,
+        batch: true,
+      },
+      orderBy: { examDate: 'asc' },
+    });
+  }
+
+  async findPapersByBatch(academyId: string, batchId: string) {
+    return this.prisma.examPaper.findMany({
+      where: { academyId, batchId, deletedAt: null },
+      include: {
+        exam: true,
+        subject: true,
+        batch: true,
+      },
+      orderBy: { examDate: 'asc' },
+    });
+  }
+
   async findOnePaper(academyId: string, id: string) {
     const paper = await this.prisma.examPaper.findFirst({
       where: { id, academyId, deletedAt: null },
@@ -308,5 +332,95 @@ export class ExamService {
       },
       reportDetails: subjectsCard,
     };
+  }
+
+  async findAllResults(academyId: string, filters: { courseId?: string; batchId?: string; examId?: string } = {}) {
+    const where: any = {
+      academyId,
+      deletedAt: null,
+    };
+
+    if (filters.examId) {
+      where.examPaper = { examId: filters.examId, deletedAt: null };
+    }
+
+    if (filters.batchId) {
+      where.examPaper = { ...where.examPaper, batchId: filters.batchId };
+    }
+
+    const results = await this.prisma.examResult.findMany({
+      where,
+      include: {
+        student: {
+          include: {
+            user: true,
+            course: true,
+            batch: true,
+          },
+        },
+        examPaper: {
+          include: {
+            exam: true,
+            subject: true,
+            batch: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return results.map((r: any) => {
+      const maxMarks = r.examPaper?.maxMarks ? parseFloat(r.examPaper.maxMarks.toString()) : 100;
+      const obtained = r.marksObtained ? parseFloat(r.marksObtained.toString()) : 0;
+      const pct = maxMarks > 0 ? (obtained / maxMarks) * 100 : 0;
+
+      return {
+        id: r.id,
+        studentId: r.studentId,
+        studentName: `${r.student?.user?.firstName || ''} ${r.student?.user?.lastName || ''}`.trim(),
+        admissionNumber: r.student?.admissionNumber || '',
+        rollNumber: r.student?.rollNumber || r.student?.universityRegNumber || '',
+        courseName: r.student?.course?.name || '',
+        batchName: r.student?.batch?.name || r.examPaper?.batch?.name || '',
+        examTitle: r.examPaper?.exam?.name || 'End-Term Examination',
+        subjectName: r.examPaper?.subject?.name || '',
+        subjectCode: r.examPaper?.subject?.code || '',
+        marksObtained: obtained,
+        maxMarks: maxMarks,
+        percentage: parseFloat(pct.toFixed(1)),
+        grade: this.calculateGradeLetter(pct),
+        status: r.status || (pct >= 40 ? 'pass' : 'fail'),
+        remarks: r.remarks || 'Graded by Department Faculty',
+      };
+    });
+  }
+
+  async findAllSemesterGrades(academyId: string, filters: { studentId?: string; courseId?: string; semester?: number } = {}) {
+    const where: any = {
+      academyId,
+      deletedAt: null,
+    };
+
+    if (filters.studentId) where.studentId = filters.studentId;
+    if (filters.courseId) where.courseId = filters.courseId;
+    if (filters.semester) where.semester = filters.semester;
+
+    return this.prisma.studentSemesterGrade.findMany({
+      where,
+      include: {
+        student: {
+          include: {
+            user: true,
+            course: true,
+            batch: true,
+          },
+        },
+        course: true,
+      },
+      orderBy: [
+        { semester: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
   }
 }

@@ -22,6 +22,12 @@ export interface Student {
   batch?: { id: string; name: string };
   status: string;
   temporaryPassword?: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
 }
 
 export interface PaginatedStudents {

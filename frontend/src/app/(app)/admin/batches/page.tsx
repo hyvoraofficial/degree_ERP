@@ -548,7 +548,7 @@ export default function BatchesPage() {
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value)}
                   required
-                  placeholder="e.g. NEET26A"
+                  placeholder="e.g. CSE-2026-A"
                 />
               </div>
 

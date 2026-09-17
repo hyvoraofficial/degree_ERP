@@ -55,16 +55,16 @@ function LoginFormContent() {
   let portalIcon = <Lock className="w-6 h-6 text-white" />;
 
   if (selectedRole === 'ACADEMY_ADMIN') {
-    portalTitle = 'Academy Admin Portal';
-    portalSubtitle = 'Sign in to manage Branch, Staff & Financials';
+    portalTitle = 'College Admin Portal';
+    portalSubtitle = 'Sign in to manage Departments, Faculty, Semesters & Students';
     portalIcon = <LayoutDashboard className="w-6 h-6 text-white" />;
   } else if (selectedRole === 'TEACHER') {
-    portalTitle = 'Faculty Teacher Portal';
-    portalSubtitle = 'Sign in to manage Classes, Attendance & Notes';
+    portalTitle = 'Faculty & HOD Portal';
+    portalSubtitle = 'Sign in to manage Classes, Timetable, Attendance & Marks';
     portalIcon = <Users className="w-6 h-6 text-white" />;
   } else if (selectedRole === 'STUDENT') {
-    portalTitle = 'Student Learning Portal';
-    portalSubtitle = 'Sign in to view Courses, Materials & Results';
+    portalTitle = 'Student Degree Portal';
+    portalSubtitle = 'Sign in to view Courses, Timetable, Grades & Placements';
     portalIcon = <GraduationCap className="w-6 h-6 text-white" />;
   } else if (selectedRole === 'SUPER_ADMIN') {
     portalTitle = 'Platform Governance Portal';

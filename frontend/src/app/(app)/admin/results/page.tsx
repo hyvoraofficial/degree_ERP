@@ -12,6 +12,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { API_BASE_URL, getAuthToken, getSubdomain } from '@/config/api.config';
 
 export interface ExamResultRow {
   id: string;
@@ -107,110 +108,65 @@ export default function AdminResultsPage() {
 
   // 4. Fetch Results when course selected
   const fetchResults = React.useCallback(async () => {
-    if (!selectedBranchId || !selectedCourseId) {
-      setResults([]);
-      return;
-    }
     setIsLoadingResults(true);
 
     try {
-      const activeCourse = courses.find(c => c.id === selectedCourseId);
+      const token = getAuthToken();
+      const params = new URLSearchParams();
+      if (selectedCourseId) params.append('courseId', selectedCourseId);
 
-      const mockData: ExamResultRow[] = [
-        {
-          id: 'res-1',
-          studentId: 's1',
-          studentName: 'Priya Nair',
-          admissionNumber: 'HYV-2026-0002',
-          rollNumber: '10A-02',
-          courseName: activeCourse?.name || 'Grade 10',
-          batchName: 'Batch A - 2026',
-          examTitle: 'Mid-Term STEM Assessment',
-          subjectName: 'Advanced Mathematics',
-          marksObtained: 95.0,
-          maxMarks: 100.0,
-          percentage: 95.0,
-          grade: 'A+',
-          status: 'pass',
-          remarks: 'Outstanding layout and problem solving steps.'
+      const res = await fetch(`${API_BASE_URL}/exams/results/all?${params.toString()}`, {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'X-Academy-Subdomain': getSubdomain(),
         },
-        {
-          id: 'res-2',
-          studentId: 's2',
-          studentName: 'Rohan Sharma',
-          admissionNumber: 'HYV-2026-0003',
-          rollNumber: '10A-03',
-          courseName: activeCourse?.name || 'Grade 10',
-          batchName: 'Batch A - 2026',
-          examTitle: 'Mid-Term STEM Assessment',
-          subjectName: 'Advanced Mathematics',
-          marksObtained: 84.5,
-          maxMarks: 100.0,
-          percentage: 84.5,
-          grade: 'A',
-          status: 'pass',
-          remarks: 'Excellent concept comprehension in trigonometry.'
-        },
-        {
-          id: 'res-3',
-          studentId: 's3',
-          studentName: 'Devendra Verma',
-          admissionNumber: 'HYV-2026-0004',
-          rollNumber: '10A-04',
-          courseName: activeCourse?.name || 'Grade 10',
-          batchName: 'Batch A - 2026',
-          examTitle: 'Mid-Term STEM Assessment',
-          subjectName: 'Classical Physics',
-          marksObtained: 76.0,
-          maxMarks: 100.0,
-          percentage: 76.0,
-          grade: 'B',
-          status: 'pass',
-          remarks: 'Good grasp of Newtonian mechanics.'
-        },
-        {
-          id: 'res-4',
-          studentId: 's4',
-          studentName: 'Kiran Reddy',
-          admissionNumber: 'HYV-2026-0005',
-          rollNumber: '10A-05',
-          courseName: activeCourse?.name || 'Grade 10',
-          batchName: 'Batch B - 2026',
-          examTitle: 'Mid-Term STEM Assessment',
-          subjectName: 'Intro to Programming',
-          marksObtained: 42.0,
-          maxMarks: 100.0,
-          percentage: 42.0,
-          grade: 'F',
-          status: 'fail',
-          remarks: 'Requires additional practice in loop conditions.'
-        },
-        {
-          id: 'res-5',
-          studentId: 's5',
-          studentName: 'Sneha Patel',
-          admissionNumber: 'HYV-2026-0006',
-          rollNumber: '10A-06',
-          courseName: activeCourse?.name || 'Grade 10',
-          batchName: 'Batch B - 2026',
-          examTitle: 'Mid-Term STEM Assessment',
-          subjectName: 'Advanced Mathematics',
-          marksObtained: 89.0,
-          maxMarks: 100.0,
-          percentage: 89.0,
-          grade: 'A',
-          status: 'pass',
-          remarks: 'Very neat presentation and logic.'
-        }
-      ];
+      });
 
-      setResults(mockData);
+      if (!res.ok) {
+        throw new Error('Failed to retrieve exam results from database');
+      }
+
+      const json = await res.json();
+      const rawData = json.data || [];
+
+      const rows: ExamResultRow[] = rawData.map((item: any) => {
+        const marks = Number(item.marksObtained) || 0;
+        const maxMarks = Number(item.examPaper?.maxMarks) || 100;
+        const percentage = Math.round((marks / maxMarks) * 100);
+        let grade = 'F';
+        if (percentage >= 90) grade = 'O';
+        else if (percentage >= 80) grade = 'A+';
+        else if (percentage >= 70) grade = 'A';
+        else if (percentage >= 60) grade = 'B+';
+        else if (percentage >= 50) grade = 'B';
+        else if (percentage >= 40) grade = 'P';
+
+        return {
+          id: item.id,
+          studentId: item.studentId,
+          studentName: item.student?.user ? `${item.student.user.firstName} ${item.student.user.lastName}` : 'Unknown Student',
+          admissionNumber: item.student?.admissionNumber || item.student?.universityRegNumber || 'N/A',
+          rollNumber: item.student?.rollNumber || 'N/A',
+          courseName: item.student?.course?.name || 'Degree Program',
+          batchName: item.student?.batch?.name || 'Section A',
+          examTitle: item.examPaper?.exam?.name || 'Semester Assessment',
+          subjectName: item.examPaper?.subject?.name || 'Core Subject',
+          marksObtained: marks,
+          maxMarks: maxMarks,
+          percentage: percentage,
+          grade: grade,
+          status: item.status === 'pass' ? 'pass' : 'fail',
+          remarks: item.remarks || '',
+        };
+      });
+
+      setResults(rows);
     } catch (err: any) {
       toast('Failed to fetch results', err.message || 'Error retrieving results', 'error');
     } finally {
       setIsLoadingResults(false);
     }
-  }, [selectedBranchId, selectedCourseId, courses, toast]);
+  }, [selectedCourseId, toast]);
 
   React.useEffect(() => {
     fetchResults();

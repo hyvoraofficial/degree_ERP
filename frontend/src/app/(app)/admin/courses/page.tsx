@@ -607,29 +607,29 @@ export default function CoursesPage() {
               <X className="w-4 h-4" />
             </button>
             <h3 className="text-lg font-black text-slate-950 mb-1">
-              Create New Course
+              Create Degree Program
             </h3>
             <p className="text-xs text-slate-600 font-extrabold uppercase tracking-wider mb-4">
-              Academic curriculum and syllabus configuration
+              Academic degree program and curriculum configuration
             </p>
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Course Name *"
+                  label="Program Name *"
                   id="name"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g. JEE Masterclass 2026"
+                  placeholder="e.g. B.Tech Computer Science & Engineering"
                   required
                 />
                 <Input
-                  label="Course Code *"
+                  label="Program Code *"
                   id="code"
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value)}
                   required
-                  placeholder="e.g. JEE-2026"
+                  placeholder="e.g. BTECH-CSE"
                 />
               </div>
 

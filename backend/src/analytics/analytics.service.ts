@@ -94,17 +94,17 @@ export class AnalyticsService {
       }),
       // Attendance rates percentages
       this.prisma.attendanceRecord.aggregate({
-        where: { academyId },
+        where: { attendance: { academyId } },
         _count: { id: true },
       }),
     ]);
 
     // Average attendance percentage
     const presentRecords = await this.prisma.attendanceRecord.count({
-      where: { academyId, status: 'present' },
+      where: { attendance: { academyId }, status: 'present' },
     });
     const totalRecordsCount = attendanceRateResult._count.id;
-    const avgAttendanceRate = totalRecordsCount > 0 ? (presentRecords / totalRecordsCount) * 100 : 92.50; // default mockup check fallback
+    const avgAttendanceRate = totalRecordsCount > 0 ? (presentRecords / totalRecordsCount) * 100 : 100.0;
 
     const revenue = revenueResult._sum?.amountPaid ? parseFloat(revenueResult._sum.amountPaid.toString()) : 0;
 
@@ -135,25 +135,53 @@ export class AnalyticsService {
       _count: { id: true },
     });
 
-    const genderSplits = genderGroups.map((g) => ({
-      name: g.gender || 'Other',
+    const genderDistribution = genderGroups.map((g) => ({
+      name: g.gender ? g.gender.charAt(0).toUpperCase() + g.gender.slice(1) : 'Other',
       count: g._count.id,
     }));
 
-    // 2. Admission trends over the last months
+    // 2. Department distribution
+    const departmentGroups = await this.prisma.student.groupBy({
+      by: ['departmentId'],
+      where: { academyId, deletedAt: null },
+      _count: { id: true },
+    });
+
+    const departments = await this.prisma.department.findMany({
+      where: { academyId, deletedAt: null },
+      select: { id: true, code: true, name: true },
+    });
+    const deptMap = new Map(departments.map(d => [d.id, d.code || d.name]));
+
+    const departmentDistribution = departmentGroups.map(dg => ({
+      name: dg.departmentId ? deptMap.get(dg.departmentId) || 'General' : 'General',
+      count: dg._count.id,
+    }));
+
+    // 3. Admission trends by month
+    const students = await this.prisma.student.findMany({
+      where: { academyId, deletedAt: null },
+      select: { createdAt: true },
+    });
+
+    const monthCounts: Record<string, number> = {};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    students.forEach(st => {
+      const m = months[new Date(st.createdAt).getMonth()];
+      monthCounts[m] = (monthCounts[m] || 0) + 1;
+    });
+
+    const admissionGrowthTrend = months
+      .filter(m => monthCounts[m] !== undefined || ['Aug', 'Sep', 'Oct'].includes(m))
+      .map(month => ({
+        month,
+        admissions: monthCounts[month] || 0,
+      }));
+
     return {
-      genderDistribution: genderSplits.length > 0 ? genderSplits : [
-        { name: 'Male', count: 120 },
-        { name: 'Female', count: 110 },
-      ],
-      admissionGrowthTrend: [
-        { month: 'Jan', admissions: 12 },
-        { month: 'Feb', admissions: 18 },
-        { month: 'Mar', admissions: 25 },
-        { month: 'Apr', admissions: 30 },
-        { month: 'May', admissions: 45 },
-        { month: 'Jun', admissions: 60 },
-      ],
+      genderDistribution: genderDistribution.length > 0 ? genderDistribution : [{ name: 'Enrolled', count: students.length }],
+      departmentDistribution,
+      admissionGrowthTrend: admissionGrowthTrend.length > 0 ? admissionGrowthTrend : [{ month: 'Current', admissions: students.length }],
     };
   }
 
@@ -170,14 +198,27 @@ export class AnalyticsService {
       where: { academyId, status: 'pending', deletedAt: null },
     });
 
+    const departmentFaculty = await this.prisma.teacher.groupBy({
+      by: ['departmentId'],
+      where: { academyId, deletedAt: null },
+      _count: { id: true },
+    });
+
+    const departments = await this.prisma.department.findMany({
+      where: { academyId, deletedAt: null },
+      select: { id: true, code: true, name: true },
+    });
+    const deptMap = new Map(departments.map(d => [d.id, d.code || d.name]));
+
+    const facultyDistribution = departmentFaculty.map(df => ({
+      department: df.departmentId ? deptMap.get(df.departmentId) || 'General' : 'General',
+      count: df._count.id,
+    }));
+
     return {
       totalTeachersCount: totalTeachers,
       pendingLeaveRequests: pendingLeavesCount,
-      teacherPerformanceRates: [
-        { rating: '5 Star', count: 15 },
-        { rating: '4 Star', count: 28 },
-        { rating: '3 Star', count: 7 },
-      ],
+      facultyDistribution,
     };
   }
 
@@ -186,31 +227,37 @@ export class AnalyticsService {
   // ==========================================
 
   async getRevenueAnalytics(academyId: string) {
-    const monthlyCollections = await this.prisma.payment.groupBy({
+    const paymentModes = await this.prisma.payment.groupBy({
       by: ['paymentMode'],
       where: { academyId, deletedAt: null },
       _sum: { amountPaid: true },
     });
 
-    const paymentMethodsSummary = monthlyCollections.map((m) => ({
-      method: m.paymentMode,
+    const collectionsSummary = paymentModes.map((m) => ({
+      method: m.paymentMode || 'Online',
       totalAmount: m._sum?.amountPaid ? parseFloat(m._sum.amountPaid.toString()) : 0,
     }));
 
+    const payments = await this.prisma.payment.findMany({
+      where: { academyId, deletedAt: null },
+      select: { paymentDate: true, amountPaid: true },
+    });
+
+    const monthSums: Record<string, number> = {};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    payments.forEach(p => {
+      const m = months[new Date(p.paymentDate).getMonth()];
+      monthSums[m] = (monthSums[m] || 0) + parseFloat(p.amountPaid.toString());
+    });
+
+    const monthlyRevenueTrend = Object.keys(monthSums).map(month => ({
+      month,
+      collections: monthSums[month],
+    }));
+
     return {
-      collectionsSummary: paymentMethodsSummary.length > 0 ? paymentMethodsSummary : [
-        { method: 'UPI', totalAmount: 45000.00 },
-        { method: 'Card', totalAmount: 32000.00 },
-        { method: 'Cash', totalAmount: 18000.00 },
-      ],
-      monthlyRevenueTrend: [
-        { month: 'Jan', collections: 80000.00 },
-        { month: 'Feb', collections: 95000.00 },
-        { month: 'Mar', collections: 110000.00 },
-        { month: 'Apr', collections: 105000.00 },
-        { month: 'May', collections: 125000.00 },
-        { month: 'Jun', collections: 140000.00 },
-      ],
+      collectionsSummary: collectionsSummary.length > 0 ? collectionsSummary : [{ method: 'Total', totalAmount: 0 }],
+      monthlyRevenueTrend: monthlyRevenueTrend.length > 0 ? monthlyRevenueTrend : [{ month: 'Current', collections: 0 }],
     };
   }
 
@@ -219,20 +266,57 @@ export class AnalyticsService {
   // ==========================================
 
   async getAttendanceAnalytics(academyId: string) {
+    // 1. Get recent attendance sessions
+    const sessions = await this.prisma.attendance.findMany({
+      where: { academyId, deletedAt: null },
+      orderBy: { date: 'desc' },
+      take: 7,
+      select: {
+        date: true,
+        totalStudents: true,
+        presentCount: true,
+      },
+    });
+
+    const attendanceTrends = sessions.map(s => {
+      const total = s.totalStudents || 0;
+      const present = s.presentCount || 0;
+      const pct = total > 0 ? (present / total) * 100 : 100.0;
+      return {
+        date: new Date(s.date).toISOString().split('T')[0],
+        presencePercentage: parseFloat(pct.toFixed(1)),
+      };
+    });
+
+    // 2. Batch rankings by attendance
+    const batches = await this.prisma.batch.findMany({
+      where: { academyId, deletedAt: null },
+      include: {
+        attendance: {
+          where: { deletedAt: null },
+          select: { totalStudents: true, presentCount: true },
+        },
+      },
+    });
+
+    const batchRankings = batches.map((b, idx) => {
+      let totalStudents = 0;
+      let totalPresent = 0;
+      b.attendance.forEach((s: any) => {
+        totalStudents += s.totalStudents || 0;
+        totalPresent += s.presentCount || 0;
+      });
+      const attendanceRate = totalStudents > 0 ? (totalPresent / totalStudents) * 100 : 100.0;
+      return {
+        rank: idx + 1,
+        batchName: b.name,
+        attendanceRate: parseFloat(attendanceRate.toFixed(1)),
+      };
+    }).sort((a, b) => b.attendanceRate - a.attendanceRate).map((item, idx) => ({ ...item, rank: idx + 1 }));
+
     return {
-      attendanceTrends: [
-        { date: '2026-07-20', presencePercentage: 94.5 },
-        { date: '2026-07-21', presencePercentage: 92.8 },
-        { date: '2026-07-22', presencePercentage: 95.0 },
-        { date: '2026-07-23', presencePercentage: 91.2 },
-        { date: '2026-07-24', presencePercentage: 93.6 },
-      ],
-      batchRankings: [
-        { rank: 1, batchName: 'Grade 10 Calculus A', attendanceRate: 98.2 },
-        { rank: 2, batchName: 'Science Section B', attendanceRate: 96.5 },
-        { rank: 3, batchName: 'Commerce Section A', attendanceRate: 91.0 },
-        { rank: 4, batchName: 'Calculus Section C', attendanceRate: 88.4 },
-      ],
+      attendanceTrends: attendanceTrends.length > 0 ? attendanceTrends : [{ date: new Date().toISOString().split('T')[0], presencePercentage: 100.0 }],
+      batchRankings,
     };
   }
 }

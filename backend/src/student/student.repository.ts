@@ -586,20 +586,24 @@ export class StudentRepository {
 
   async getFeeSummary(academyId: string, studentId: string) {
     try {
-      const allocations: any[] = await this.prisma.$queryRaw`
-        SELECT COALESCE(SUM(amount), 0)::float as total 
-        FROM fee_allocations 
-        WHERE student_id = ${studentId}::uuid AND academy_id = ${academyId}::uuid AND deleted_at IS NULL
-      `;
+      const allocations = await this.prisma.feeAllocation.findMany({
+        where: { studentId, academyId, deletedAt: null },
+        include: {
+          payments: {
+            where: { deletedAt: null },
+          },
+        },
+      });
 
-      const payments: any[] = await this.prisma.$queryRaw`
-        SELECT COALESCE(SUM(amount), 0)::float as total 
-        FROM payments 
-        WHERE student_id = ${studentId}::uuid AND academy_id = ${academyId}::uuid AND deleted_at IS NULL
-      `;
+      let totalAllocated = 0;
+      let totalPaid = 0;
 
-      const totalAllocated = allocations[0]?.total || 0;
-      const totalPaid = payments[0]?.total || 0;
+      allocations.forEach((alloc: any) => {
+        totalAllocated += alloc.totalAmount ? parseFloat(alloc.totalAmount.toString()) : 0;
+        alloc.payments?.forEach((p: any) => {
+          totalPaid += parseFloat(p.amountPaid.toString());
+        });
+      });
 
       return {
         totalAllocated,

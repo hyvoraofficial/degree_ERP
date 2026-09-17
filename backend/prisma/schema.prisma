@@ -25,10 +25,11 @@ model Academy {
   teachers                 Teacher[]
   teacherLeaves            TeacherLeave[]
   courses                  Course[]
+  departments              Department[]
   subjects                 Subject[]
   classSchedules           ClassSchedule[]
+  timetables               TimetableSchedule[]
   studentAttendance        Attendance[]
-  studentAttendanceRecords AttendanceRecord[]
   teacherAttendance        TeacherAttendance[]
   feeStructures            FeeStructure[]
   feeAllocations           FeeAllocation[]
@@ -55,6 +56,13 @@ model Academy {
   mediaFiles               MediaFile[]
   branches                 Branch[]
   teacherSubjects          TeacherSubject[]
+  placementDrives          PlacementDrive[]
+  studentPlacements        StudentPlacement[]
+  internshipRecords        InternshipRecord[]
+  libraryBooks             LibraryBook[]
+  bookIssues               BookIssueRecord[]
+  semesterGrades           StudentSemesterGrade[]
+  gradingSchemes           GradingScheme[]
 
   @@map("academies")
 }
@@ -182,78 +190,159 @@ model Branch {
   deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
 
   academy       Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  departments   Department[]
   courses       Course[]
   batches       Batch[]
   students      Student[]
   teachers      Teacher[]
   teacherSubjects TeacherSubject[]
+  timetables    TimetableSchedule[]
+  attendances   Attendance[]
 
   @@unique([academyId, name], name: "uq_branches_name")
   @@unique([academyId, code], name: "uq_branches_code")
   @@map("branches")
 }
 
-model Student {
-  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId       String         @map("academy_id") @db.Uuid
-  branchId        String         @map("branch_id") @db.Uuid
-  userId          String         @unique @map("user_id") @db.Uuid
-  courseId        String         @map("course_id") @db.Uuid
-  batchId         String         @map("batch_id") @db.Uuid
-  admissionNumber String         @map("admission_number") @db.VarChar(100)
-  admissionDate   DateTime       @default(now()) @map("admission_date") @db.Date
-  dateOfBirth     DateTime       @map("date_of_birth") @db.Date
-  gender          String?        @db.VarChar(50)
-  bloodGroup      String?        @map("blood_group") @db.VarChar(20)
-  parentName      String         @map("parent_name") @db.VarChar(255)
-  parentPhone     String         @map("parent_phone") @db.VarChar(50)
-  parentEmail     String?        @map("parent_email") @db.VarChar(255)
-  fatherName      String?        @map("father_name") @db.VarChar(255)
-  motherName      String?        @map("mother_name") @db.VarChar(255)
-  rollNumber      String?        @map("roll_number") @db.VarChar(100)
-  feePlan         String?        @map("fee_plan") @db.VarChar(100)
-  studentPhotoId  String?        @map("student_photo_id") @db.Uuid
-  aadhaarId       String?        @map("aadhaar_id") @db.Uuid
-  previousMarksCardId String?    @map("previous_marks_card_id") @db.Uuid
-  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime       @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt       DateTime?      @map("deleted_at") @db.Timestamptz
+model Department {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId     String    @map("academy_id") @db.Uuid
+  branchId      String?   @map("branch_id") @db.Uuid
+  name          String    @db.VarChar(255)
+  code          String    @db.VarChar(100)
+  description   String?
+  hodId         String?   @map("hod_id") @db.Uuid
+  status        String    @default("active") @db.VarChar(50)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
 
-  academy               Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
-  branch                Branch             @relation(fields: [branchId], references: [id])
-  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course                Course             @relation(fields: [courseId], references: [id])
-  batch                 Batch              @relation(fields: [batchId], references: [id])
-  studentPhoto          MediaFile?         @relation("studentPhoto", fields: [studentPhotoId], references: [id])
-  aadhaar               MediaFile?         @relation("aadhaar", fields: [aadhaarId], references: [id])
-  previousMarksCard    MediaFile?         @relation("previousMarksCard", fields: [previousMarksCardId], references: [id])
-  attendanceRecords     AttendanceRecord[]
-  feeAllocations        FeeAllocation[]
-  assignmentSubmissions AssignmentSubmission[]
-  examResults           ExamResult[]
+  academy       Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  branch        Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  hod           Teacher?  @relation("DepartmentHOD", fields: [hodId], references: [id], onDelete: SetNull)
+  courses       Course[]
+  subjects      Subject[]
+  teachers      Teacher[] @relation("DepartmentFaculty")
+  students      Student[]
+  batches       Batch[]
+  timetables    TimetableSchedule[]
+  libraryBooks  LibraryBook[]
 
-  @@unique([academyId, admissionNumber], name: "uq_students_academy_admission_number")
-  @@map("students")
+  @@unique([academyId, code], name: "uq_departments_academy_code")
+  @@index([academyId])
+  @@index([branchId])
+  @@index([hodId])
+  @@index([status])
+  @@map("departments")
+}
+
+model Course {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId       String    @map("academy_id") @db.Uuid
+  branchId        String    @map("branch_id") @db.Uuid
+  departmentId    String?   @map("department_id") @db.Uuid
+  name            String    @db.VarChar(255)
+  code            String    @db.VarChar(100)
+  degreeType      String?   @default("B.Tech") @map("degree_type") @db.VarChar(100)
+  duration        String?   @default("4 Years") @db.VarChar(100)
+  totalSemesters  Int       @default(8) @map("total_semesters")
+  schemeYear      String?   @default("2026") @map("scheme_year") @db.VarChar(50)
+  creditsRequired Int?      @default(160) @map("credits_required")
+  description     String?
+  syllabusId      String?   @map("syllabus_id") @db.Uuid
+  status          String    @default("active") @db.VarChar(50)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+
+  academy            Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  branch             Branch             @relation(fields: [branchId], references: [id])
+  department         Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  subjects           Subject[]
+  students           Student[]
+  admissionEnquiries AdmissionEnquiry[]
+  batches            Batch[]
+  teacherSubjects    TeacherSubject[]
+  timetables         TimetableSchedule[]
+  semesterGrades     StudentSemesterGrade[]
+
+  @@unique([branchId, code], name: "uq_courses_branch_code")
+  @@unique([branchId, name], name: "uq_courses_branch_name")
+  @@index([academyId])
+  @@index([branchId])
+  @@index([departmentId])
+  @@index([degreeType])
+  @@index([status])
+  @@map("courses")
+}
+
+model Subject {
+  id              String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId       String          @map("academy_id") @db.Uuid
+  courseId        String          @map("course_id") @db.Uuid
+  departmentId    String?         @map("department_id") @db.Uuid
+  semester        Int             @default(1)
+  name            String          @db.VarChar(255)
+  code            String          @db.VarChar(100)
+  description     String?
+  subjectType     String          @default("theory") @map("subject_type") @db.VarChar(50)
+  credits         Int             @default(3)
+  internalMarks   Decimal?        @default(40.00) @map("internal_marks") @db.Decimal(6, 2)
+  externalMarks   Decimal?        @default(60.00) @map("external_marks") @db.Decimal(6, 2)
+  totalMarks      Decimal?        @default(100.00) @map("total_marks") @db.Decimal(6, 2)
+  passingMarks    Decimal?        @default(40.00) @map("passing_marks") @db.Decimal(6, 2)
+  isElective      Boolean         @default(false) @map("is_elective")
+  status          String          @default("active") @db.VarChar(50)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime        @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?       @map("deleted_at") @db.Timestamptz
+
+  academy         Academy         @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  course          Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  department      Department?     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  schedules       ClassSchedule[]
+  studyMaterials  StudyMaterial[]
+  videoLectures   VideoLecture[]
+  assignments     Assignment[]
+  examPapers      ExamPaper[]
+  attendance      Attendance[]
+  teacherSubjects TeacherSubject[]
+  timetables      TimetableSchedule[]
+
+  @@unique([courseId, code], name: "uq_subjects_course_code")
+  @@unique([courseId, name], name: "uq_subjects_course_name")
+  @@index([academyId])
+  @@index([courseId])
+  @@index([departmentId])
+  @@index([semester])
+  @@index([subjectType])
+  @@index([status])
+  @@map("subjects")
 }
 
 model Batch {
-  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId   String    @map("academy_id") @db.Uuid
-  branchId    String    @map("branch_id") @db.Uuid
-  courseId    String    @map("course_id") @db.Uuid
-  name        String    @db.VarChar(255)
-  code        String    @db.VarChar(100)
-  startDate   DateTime  @map("start_date") @db.Date
-  endDate     DateTime  @map("end_date") @db.Date
-  capacity    Int?      @map("capacity")
-  status      String    @default("active") @db.VarChar(50)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId       String    @map("academy_id") @db.Uuid
+  branchId        String    @map("branch_id") @db.Uuid
+  courseId        String    @map("course_id") @db.Uuid
+  departmentId    String?   @map("department_id") @db.Uuid
+  name            String    @db.VarChar(255)
+  code            String    @db.VarChar(100)
+  academicYear    String?   @default("2026-2030") @map("academic_year") @db.VarChar(50)
+  currentSemester Int       @default(1) @map("current_semester")
+  sectionName     String?   @default("A") @map("section_name") @db.VarChar(50)
+  startDate       DateTime  @map("start_date") @db.Date
+  endDate         DateTime  @map("end_date") @db.Date
+  capacity        Int?      @map("capacity")
+  status          String    @default("active") @db.VarChar(50)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
 
   academy              Academy              @relation(fields: [academyId], references: [id], onDelete: Cascade)
   branch               Branch               @relation(fields: [branchId], references: [id])
   course               Course               @relation(fields: [courseId], references: [id])
+  department           Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   students             Student[]
   schedules            ClassSchedule[]
   attendance           Attendance[]
@@ -262,9 +351,339 @@ model Batch {
   assignments          Assignment[]
   examPapers           ExamPaper[]
   teacherSubjects      TeacherSubject[]
+  timetables           TimetableSchedule[]
 
   @@unique([branchId, code], name: "uq_batches_branch_code")
+  @@index([academyId])
+  @@index([branchId])
+  @@index([courseId])
+  @@index([departmentId])
+  @@index([currentSemester])
+  @@index([academicYear])
+  @@index([status])
   @@map("batches")
+}
+
+model Teacher {
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId       String         @map("academy_id") @db.Uuid
+  branchId        String?        @map("branch_id") @db.Uuid
+  departmentId    String?        @map("department_id") @db.Uuid
+  userId          String         @unique @map("user_id") @db.Uuid
+  employeeNumber  String         @map("employee_number") @db.VarChar(100)
+  designation     String?        @default("Assistant Professor") @db.VarChar(100)
+  qualification   String?        @db.VarChar(255)
+  experienceYears Int?           @default(3) @map("experience_years")
+  specialization  String?        @db.VarChar(255)
+  joiningDate     DateTime       @default(now()) @map("joining_date") @db.Date
+  salaryStructure Json?          @map("salary_structure")
+  status          String         @default("active") @db.VarChar(50)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime       @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?      @map("deleted_at") @db.Timestamptz
+
+  academy           Academy             @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  branch            Branch?             @relation(fields: [branchId], references: [id])
+  department        Department?         @relation("DepartmentFaculty", fields: [departmentId], references: [id], onDelete: SetNull)
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaves            TeacherLeave[]
+  schedules         ClassSchedule[]
+  studentAttendance Attendance[]
+  teacherAttendance TeacherAttendance[]
+  studyMaterials    StudyMaterial[]
+  videoLectures     VideoLecture[]
+  assignments       Assignment[]
+  teacherSubjects   TeacherSubject[]
+  headedDepartment  Department[]        @relation("DepartmentHOD")
+  timetables        TimetableSchedule[]
+  mentoredInternships InternshipRecord[]
+
+  @@unique([academyId, employeeNumber], name: "uq_teachers_academy_employee_number")
+  @@index([academyId])
+  @@index([branchId])
+  @@index([departmentId])
+  @@index([userId])
+  @@index([designation])
+  @@index([status])
+  @@map("teachers")
+}
+
+model Student {
+  id                  String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId           String         @map("academy_id") @db.Uuid
+  branchId            String         @map("branch_id") @db.Uuid
+  userId              String         @unique @map("user_id") @db.Uuid
+  courseId            String         @map("course_id") @db.Uuid
+  batchId             String         @map("batch_id") @db.Uuid
+  departmentId        String?        @map("department_id") @db.Uuid
+  semester            Int            @default(1)
+  section             String?        @default("A") @db.VarChar(50)
+  admissionYear       String?        @default("2026") @map("admission_year") @db.VarChar(50)
+  universityRegNumber String?        @map("university_reg_number") @db.VarChar(100)
+  admissionNumber     String         @map("admission_number") @db.VarChar(100)
+  admissionDate       DateTime       @default(now()) @map("admission_date") @db.Date
+  dateOfBirth         DateTime       @map("date_of_birth") @db.Date
+  gender              String?        @db.VarChar(50)
+  bloodGroup          String?        @map("blood_group") @db.VarChar(20)
+  parentName          String         @map("parent_name") @db.VarChar(255)
+  parentPhone         String         @map("parent_phone") @db.VarChar(50)
+  parentEmail         String?        @map("parent_email") @db.VarChar(255)
+  fatherName          String?        @map("father_name") @db.VarChar(255)
+  motherName          String?        @map("mother_name") @db.VarChar(255)
+  rollNumber          String?        @map("roll_number") @db.VarChar(100)
+  feePlan             String?        @map("fee_plan") @db.VarChar(100)
+  studentStatus       String         @default("active") @map("student_status") @db.VarChar(50)
+  studentPhotoId      String?        @map("student_photo_id") @db.Uuid
+  aadhaarId           String?        @map("aadhaar_id") @db.Uuid
+  previousMarksCardId String?        @map("previous_marks_card_id") @db.Uuid
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime       @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt           DateTime?      @map("deleted_at") @db.Timestamptz
+
+  academy               Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  branch                Branch             @relation(fields: [branchId], references: [id])
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course                Course             @relation(fields: [courseId], references: [id])
+  batch                 Batch              @relation(fields: [batchId], references: [id])
+  department            Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  studentPhoto          MediaFile?         @relation("studentPhoto", fields: [studentPhotoId], references: [id])
+  aadhaar               MediaFile?         @relation("aadhaar", fields: [aadhaarId], references: [id])
+  previousMarksCard     MediaFile?         @relation("previousMarksCard", fields: [previousMarksCardId], references: [id])
+  attendanceRecords     AttendanceRecord[]
+  feeAllocations        FeeAllocation[]
+  assignmentSubmissions AssignmentSubmission[]
+  examResults           ExamResult[]
+  placements            StudentPlacement[]
+  internships           InternshipRecord[]
+  semesterGrades        StudentSemesterGrade[]
+  bookIssues            BookIssueRecord[]
+
+  @@unique([academyId, admissionNumber], name: "uq_students_academy_admission_number")
+  @@index([academyId])
+  @@index([branchId])
+  @@index([courseId])
+  @@index([batchId])
+  @@index([departmentId])
+  @@index([userId])
+  @@index([semester])
+  @@index([rollNumber])
+  @@index([universityRegNumber])
+  @@index([studentStatus])
+  @@map("students")
+}
+
+model TimetableSchedule {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId    String      @map("academy_id") @db.Uuid
+  branchId     String      @map("branch_id") @db.Uuid
+  departmentId String?     @map("department_id") @db.Uuid
+  courseId     String      @map("course_id") @db.Uuid
+  batchId      String      @map("batch_id") @db.Uuid
+  subjectId    String      @map("subject_id") @db.Uuid
+  teacherId    String      @map("teacher_id") @db.Uuid
+  dayOfWeek    String      @map("day_of_week") @db.VarChar(50)
+  startTime    String      @map("start_time") @db.VarChar(50)
+  endTime      String      @map("end_time") @db.VarChar(50)
+  roomNumber   String?     @map("room_number") @db.VarChar(100)
+  isLab        Boolean     @default(false) @map("is_lab")
+  status       String      @default("active") @db.VarChar(50)
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime    @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime?   @map("deleted_at") @db.Timestamptz
+
+  academy      Academy     @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  branch       Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  course       Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  batch        Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  subject      Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher      Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([academyId])
+  @@index([branchId])
+  @@index([courseId])
+  @@index([batchId])
+  @@index([departmentId])
+  @@index([subjectId])
+  @@index([teacherId])
+  @@index([dayOfWeek])
+  @@map("timetable_schedules")
+}
+
+model PlacementDrive {
+  id                  String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId           String             @map("academy_id") @db.Uuid
+  companyName         String             @map("company_name") @db.VarChar(255)
+  jobRole             String             @map("job_role") @db.VarChar(255)
+  packageLpa          Decimal            @map("package_lpa") @db.Decimal(6, 2)
+  eligibilityCriteria String?            @map("eligibility_criteria") @db.Text
+  driveDate           DateTime?          @map("drive_date") @db.Date
+  deadlineDate        DateTime?          @map("deadline_date") @db.Date
+  location            String?            @db.VarChar(255)
+  jobType             String             @default("Full-time") @map("job_type") @db.VarChar(100)
+  status              String             @default("open") @db.VarChar(50)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime           @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt           DateTime?          @map("deleted_at") @db.Timestamptz
+
+  academy             Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  applications        StudentPlacement[]
+
+  @@index([academyId])
+  @@index([status])
+  @@index([driveDate])
+  @@index([jobType])
+  @@map("placement_drives")
+}
+
+model StudentPlacement {
+  id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId    String         @map("academy_id") @db.Uuid
+  driveId      String         @map("drive_id") @db.Uuid
+  studentId    String         @map("student_id") @db.Uuid
+  status       String         @default("applied") @db.VarChar(50)
+  remarks      String?        @db.Text
+  appliedAt    DateTime       @default(now()) @map("applied_at") @db.Timestamptz
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime       @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz
+
+  academy      Academy        @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  drive        PlacementDrive @relation(fields: [driveId], references: [id], onDelete: Cascade)
+  student      Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([driveId, studentId], name: "uq_student_placement")
+  @@index([academyId])
+  @@index([driveId])
+  @@index([studentId])
+  @@index([status])
+  @@map("student_placements")
+}
+
+model InternshipRecord {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId      String    @map("academy_id") @db.Uuid
+  studentId      String    @map("student_id") @db.Uuid
+  teacherId      String?   @map("teacher_id") @db.Uuid
+  companyName    String    @map("company_name") @db.VarChar(255)
+  role           String    @db.VarChar(255)
+  stipend        Decimal?  @db.Decimal(10, 2)
+  startDate      DateTime  @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
+  status         String    @default("active") @db.VarChar(50)
+  certificateUrl String?   @map("certificate_url") @db.VarChar(1024)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+
+  academy        Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  student        Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  mentor         Teacher?  @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@index([academyId])
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([status])
+  @@map("internship_records")
+}
+
+model LibraryBook {
+  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId       String            @map("academy_id") @db.Uuid
+  departmentId    String?           @map("department_id") @db.Uuid
+  title           String            @db.VarChar(255)
+  isbn            String?           @db.VarChar(100)
+  author          String            @db.VarChar(255)
+  category        String?           @db.VarChar(100)
+  publisher       String?           @db.VarChar(255)
+  totalCopies     Int               @default(1) @map("total_copies")
+  availableCopies Int               @default(1) @map("available_copies")
+  shelfLocation   String?           @map("shelf_location") @db.VarChar(100)
+  status          String            @default("available") @db.VarChar(50)
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime          @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?         @map("deleted_at") @db.Timestamptz
+
+  academy         Academy           @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  department      Department?       @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  issues          BookIssueRecord[]
+
+  @@index([academyId])
+  @@index([departmentId])
+  @@index([isbn])
+  @@index([status])
+  @@map("library_books")
+}
+
+model BookIssueRecord {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId  String      @map("academy_id") @db.Uuid
+  bookId     String      @map("book_id") @db.Uuid
+  studentId  String      @map("student_id") @db.Uuid
+  issueDate  DateTime    @default(now()) @map("issue_date") @db.Date
+  dueDate    DateTime    @map("due_date") @db.Date
+  returnDate DateTime?   @map("return_date") @db.Date
+  fineAmount Decimal     @default(0.00) @map("fine_amount") @db.Decimal(8, 2)
+  status     String      @default("issued") @db.VarChar(50)
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime    @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt  DateTime?   @map("deleted_at") @db.Timestamptz
+
+  academy    Academy     @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  book       LibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  student    Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([academyId])
+  @@index([bookId])
+  @@index([studentId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("book_issue_records")
+}
+
+model StudentSemesterGrade {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId          String    @map("academy_id") @db.Uuid
+  studentId          String    @map("student_id") @db.Uuid
+  courseId           String    @map("course_id") @db.Uuid
+  semester           Int
+  academicYear       String    @map("academic_year") @db.VarChar(50)
+  sgpa               Decimal?  @db.Decimal(4, 2)
+  cgpa               Decimal?  @db.Decimal(4, 2)
+  totalCreditsEarned Int?      @map("total_credits_earned")
+  backlogsCount      Int       @default(0) @map("backlogs_count")
+  status             String    @default("passed") @db.VarChar(50)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz
+
+  academy            Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  student            Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course             Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, semester], name: "uq_student_semester_grade")
+  @@index([academyId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([semester])
+  @@map("student_semester_grades")
+}
+
+model GradingScheme {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId  String    @map("academy_id") @db.Uuid
+  name       String    @default("Standard 10-Point UGC / VTU Scheme") @db.VarChar(255)
+  gradeScale Json      @default("[]") @map("grade_scale")
+  isDefault  Boolean   @default(true) @map("is_default")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz
+
+  academy    Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+
+  @@index([academyId])
+  @@index([isDefault])
+  @@map("grading_schemes")
 }
 
 model AcademySetting {
@@ -277,9 +696,12 @@ model AcademySetting {
   address            String?
   phone              String?    @db.VarChar(50)
   email              String?    @db.VarChar(255)
-  timezone           String     @default("UTC") @db.VarChar(100)
-  currency           String     @default("USD") @db.VarChar(50)
+  timezone           String     @default("Asia/Kolkata") @db.VarChar(100)
+  currency           String     @default("INR") @db.VarChar(50)
   theme              String     @default("light") @db.VarChar(50)
+  academicYear       String?    @default("2026-27") @map("academic_year") @db.VarChar(50)
+  currentSemester    String?    @default("Odd Semester (1, 3, 5, 7)") @map("current_semester") @db.VarChar(100)
+  institutionType    String?    @default("Engineering & Degree College") @map("institution_type") @db.VarChar(100)
   smtpSettings       Json?      @map("smtp_settings")
   paymentGatewayKeys Json?      @map("payment_gateway_keys")
   socialLinks        Json?      @map("social_links")
@@ -312,37 +734,6 @@ model Subscription {
   @@map("subscriptions")
 }
 
-model Teacher {
-  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId       String         @map("academy_id") @db.Uuid
-  branchId        String?        @map("branch_id") @db.Uuid
-  userId          String         @unique @map("user_id") @db.Uuid
-  employeeNumber  String         @map("employee_number") @db.VarChar(100)
-  designation     String?        @db.VarChar(100)
-  qualification   String?        @db.VarChar(255)
-  joiningDate     DateTime       @default(now()) @map("joining_date") @db.Date
-  salaryStructure Json?          @map("salary_structure")
-  status          String         @default("active") @db.VarChar(50)
-  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime       @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt       DateTime?      @map("deleted_at") @db.Timestamptz
-
-  academy           Academy             @relation(fields: [academyId], references: [id], onDelete: Cascade)
-  branch            Branch?             @relation(fields: [branchId], references: [id])
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  leaves            TeacherLeave[]
-  schedules         ClassSchedule[]
-  studentAttendance Attendance[]
-  teacherAttendance TeacherAttendance[]
-  studyMaterials    StudyMaterial[]
-  videoLectures     VideoLecture[]
-  assignments       Assignment[]
-  teacherSubjects   TeacherSubject[]
-
-  @@unique([academyId, employeeNumber], name: "uq_teachers_academy_employee_number")
-  @@map("teachers")
-}
-
 model TeacherLeave {
   id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   academyId    String    @map("academy_id") @db.Uuid
@@ -361,61 +752,6 @@ model TeacherLeave {
   teacher      Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@map("teacher_leaves")
-}
-
-model Course {
-  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId   String    @map("academy_id") @db.Uuid
-  branchId    String    @map("branch_id") @db.Uuid
-  name        String    @db.VarChar(255)
-  code        String    @db.VarChar(100)
-  description String?
-  syllabusId  String?   @map("syllabus_id") @db.Uuid
-  status      String    @default("active") @db.VarChar(50)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
-  duration    String?   @db.VarChar(100)
-
-  academy            Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
-  branch             Branch             @relation(fields: [branchId], references: [id])
-  subjects           Subject[]
-  students           Student[]
-  admissionEnquiries AdmissionEnquiry[]
-  batches            Batch[]
-  teacherSubjects    TeacherSubject[]
-
-  @@unique([branchId, code], name: "uq_courses_branch_code")
-  @@unique([branchId, name], name: "uq_courses_branch_name")
-  @@map("courses")
-}
-
-model Subject {
-  id          String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId   String          @map("academy_id") @db.Uuid
-  courseId    String          @map("course_id") @db.Uuid
-  name        String          @db.VarChar(255)
-  code        String          @db.VarChar(100)
-  description String?
-  subjectType String          @default("theory") @map("subject_type") @db.VarChar(50)
-  status      String          @default("active") @db.VarChar(50)
-  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime        @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime?       @map("deleted_at") @db.Timestamptz
-
-  academy        Academy         @relation(fields: [academyId], references: [id], onDelete: Cascade)
-  course         Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  schedules      ClassSchedule[]
-  studyMaterials StudyMaterial[]
-  videoLectures  VideoLecture[]
-  assignments    Assignment[]
-  examPapers     ExamPaper[]
-  attendance      Attendance[]
-  teacherSubjects TeacherSubject[]
-
-  @@unique([courseId, code], name: "uq_subjects_course_code")
-  @@unique([courseId, name], name: "uq_subjects_course_name")
-  @@map("subjects")
 }
 
 model ClassSchedule {
@@ -441,38 +777,40 @@ model ClassSchedule {
 }
 
 model Attendance {
-  id        String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId String             @map("academy_id") @db.Uuid
-  batchId   String             @map("batch_id") @db.Uuid
-  subjectId String?            @map("subject_id") @db.Uuid
-  teacherId String             @map("teacher_id") @db.Uuid
-  date      DateTime           @db.Date
-  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime           @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt DateTime?          @map("deleted_at") @db.Timestamptz
+  id            String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  academyId     String             @map("academy_id") @db.Uuid
+  branchId      String             @map("branch_id") @db.Uuid
+  batchId       String             @map("batch_id") @db.Uuid
+  subjectId     String             @map("subject_id") @db.Uuid
+  teacherId     String             @map("teacher_id") @db.Uuid
+  date          DateTime           @db.Date
+  totalStudents Int                @default(0) @map("total_students")
+  presentCount  Int                @default(0) @map("present_count")
+  absentCount   Int                @default(0) @map("absent_count")
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime           @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?          @map("deleted_at") @db.Timestamptz
 
-  academy   Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
-  batch     Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  teacher   Teacher            @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  subject   Subject?           @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  records   AttendanceRecord[]
+  academy       Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  branch        Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  batch         Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  teacher       Teacher            @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject       Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  records       AttendanceRecord[]
 
-  @@unique([batchId, date, subjectId], name: "uq_attendance_session")
+  @@unique([batchId, subjectId, date], name: "uq_attendance_session")
   @@map("attendance")
 }
 
 model AttendanceRecord {
   id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  academyId    String     @map("academy_id") @db.Uuid
   attendanceId String     @map("attendance_id") @db.Uuid
   studentId    String     @map("student_id") @db.Uuid
   status       String     @default("present") @db.VarChar(50)
-  remarks      String?    @db.VarChar(255)
+  remarks      String?    @db.Text
   createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime   @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz
 
-  academy      Academy    @relation(fields: [academyId], references: [id], onDelete: Cascade)
   attendance   Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
   student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -504,7 +842,7 @@ model FeeStructure {
   name        String          @db.VarChar(255)
   description String?
   amount      Decimal         @db.Decimal(12, 2)
-  frequency   String          @default("one_time") @db.VarChar(50)
+  frequency   String          @default("semester") @db.VarChar(50)
   createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime        @default(now()) @map("updated_at") @db.Timestamptz
   deletedAt   DateTime?       @map("deleted_at") @db.Timestamptz
@@ -702,7 +1040,7 @@ model AssignmentSubmission {
   assignmentId   String    @map("assignment_id") @db.Uuid
   studentId      String    @map("student_id") @db.Uuid
   submissionDate DateTime  @default(now()) @map("submission_date") @db.Timestamptz
-  mediaFileId    String    @map("media_file_id") @db.Uuid
+  mediaFileId    String?   @map("media_file_id") @db.Uuid
   studentRemarks String?   @map("student_remarks") @db.Text
   status         String    @default("submitted") @db.VarChar(50)
   marksObtained  Decimal?  @map("marks_obtained") @db.Decimal(6, 2)
@@ -727,7 +1065,7 @@ model Exam {
   academyId   String      @map("academy_id") @db.Uuid
   name        String      @db.VarChar(255)
   description String?
-  examType    String      @default("term") @map("exam_type") @db.VarChar(100)
+  examType    String      @default("Semester End Exam") @map("exam_type") @db.VarChar(100)
   startDate   DateTime    @map("start_date") @db.Date
   endDate     DateTime    @map("end_date") @db.Date
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
@@ -986,7 +1324,7 @@ model LoginActivity {
   id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   userId         String?  @map("user_id") @db.Uuid
   attemptedEmail String   @map("attempted_email") @db.VarChar(255)
-  status         String   @db.VarChar(50) // success or failed
+  status         String   @db.VarChar(50)
   ipAddress      String?  @map("ip_address") @db.VarChar(45)
   userAgent      String?  @map("user_agent") @db.VarChar(512)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz

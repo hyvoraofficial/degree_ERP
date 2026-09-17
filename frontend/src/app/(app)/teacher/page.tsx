@@ -583,7 +583,7 @@ export default function TeacherDashboard() {
             <StatsCard
               title="Assigned Batches"
               value={`${teacher?.schedules?.length || 0} Schedules`}
-              description="Active coaching cohorts"
+              description="Active academic class cohorts"
               icon={<Layers className="w-5 h-5 text-primary" />}
             />
             <StatsCard
@@ -1399,8 +1399,8 @@ export default function TeacherDashboard() {
                 <Video className="w-10 h-10" />
               </div>
               <div>
-                <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">Chemical Bonding - Masterclass Part 1</span>
-                <span className="text-[10px] text-zinc-400 font-semibold block">Batch: NEET-A • Duration: 45 mins</span>
+                <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">Data Structures: Trees & Graph Traversal</span>
+                <span className="text-[10px] text-zinc-400 font-semibold block">Section: CSE-2026-A • Duration: 45 mins</span>
               </div>
             </div>
             <div className="p-4 border border-border rounded-xl space-y-3 bg-card">
@@ -1408,8 +1408,8 @@ export default function TeacherDashboard() {
                 <Video className="w-10 h-10" />
               </div>
               <div>
-                <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">Electrochemistry Problem Solving Session</span>
-                <span className="text-[10px] text-zinc-400 font-semibold block">Batch: JEE-A • Duration: 60 mins</span>
+                <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">DBMS: SQL Normalization & Indexing Lab</span>
+                <span className="text-[10px] text-zinc-400 font-semibold block">Section: CSE-2026-B • Duration: 60 mins</span>
               </div>
             </div>
           </div>
@@ -1422,7 +1422,7 @@ export default function TeacherDashboard() {
           <div className="flex justify-between items-center pb-3 border-b border-border">
             <div>
               <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Exams & Marks Entry</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Upload test marks, calculate ranks, and publish term report sheets.</p>
+              <p className="text-xs text-zinc-400 mt-0.5">Enter internal assessment marks, practical labs, and semester evaluations.</p>
             </div>
             <Button className="gap-2 h-10">
               <Plus className="w-4 h-4" /> Schedule Test Exam

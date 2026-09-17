@@ -24,6 +24,11 @@ import { EmailModule } from './email/email.module';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import configuration from './config/configuration';
 
+import { DepartmentModule } from './department/department.module';
+import { TimetableModule } from './timetable/timetable.module';
+import { PlacementModule } from './placement/placement.module';
+import { LibraryModule } from './library/library.module';
+
 @Module({
   imports: [
     // Configure Global environment parameters
@@ -36,15 +41,19 @@ import configuration from './config/configuration';
     AcademyModule,
     UserModule,
     BranchModule,
+    DepartmentModule,
     EmailModule,
     TeacherModule,
     StudentModule,
     AcademicModule,
     AttendanceModule,
+    TimetableModule,
     FinanceModule,
     LmsModule,
     AssignmentModule,
     ExamModule,
+    PlacementModule,
+    LibraryModule,
     NotificationModule,
     CmsModule,
     AnalyticsModule,

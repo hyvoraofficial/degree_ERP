@@ -448,12 +448,12 @@ export default function FinancePage() {
 
             <form onSubmit={handleCreatePlanSubmit} className="space-y-4">
               <Input
-                label="Fee Plan Name *"
+                label="Fee Structure Name *"
                 id="planName"
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
                 required
-                placeholder="e.g. JEE Masterclass Annual Fee"
+                placeholder="e.g. Semester Tuition Fee (Engineering)"
               />
               
               <div className="grid grid-cols-2 gap-4">

@@ -54,6 +54,68 @@ export class ExamController {
     };
   }
 
+  @Get('results/all')
+  @RequirePermissions('exams:read')
+  @ApiOperation({ summary: 'List all exam results across students' })
+  @ApiQuery({ name: 'courseId', required: false })
+  @ApiQuery({ name: 'batchId', required: false })
+  @ApiQuery({ name: 'examId', required: false })
+  async findAllResults(
+    @Req() req: any,
+    @Query('courseId') courseId?: string,
+    @Query('batchId') batchId?: string,
+    @Query('examId') examId?: string
+  ) {
+    const data = await this.examService.findAllResults(req.tenant.id, { courseId, batchId, examId });
+    return {
+      success: true,
+      data,
+      message: 'Exam results list fetched successfully.',
+    };
+  }
+
+  @Get('semester-grades/all')
+  @RequirePermissions('exams:read')
+  @ApiOperation({ summary: 'List all student semester grades (SGPA/CGPA)' })
+  @ApiQuery({ name: 'studentId', required: false })
+  @ApiQuery({ name: 'courseId', required: false })
+  @ApiQuery({ name: 'semester', required: false })
+  async findAllSemesterGrades(
+    @Req() req: any,
+    @Query('studentId') studentId?: string,
+    @Query('courseId') courseId?: string,
+    @Query('semester') semester?: string
+  ) {
+    const data = await this.examService.findAllSemesterGrades(req.tenant.id, {
+      studentId,
+      courseId,
+      semester: semester ? parseInt(semester, 10) : undefined,
+    });
+    return {
+      success: true,
+      data,
+      message: 'Semester grades fetched successfully.',
+    };
+  }
+
+  @Get('reports/student/:studentId')
+  @RequirePermissions('exams:read')
+  @ApiOperation({ summary: 'Generate student academic term report card transcript' })
+  @ApiParam({ name: 'studentId', description: 'Student UUID' })
+  @ApiQuery({ name: 'examId', required: true, description: 'Exam container UUID' })
+  async getStudentReportCard(
+    @Req() req: any,
+    @Param('studentId') studentId: string,
+    @Query('examId') examId: string
+  ) {
+    const data = await this.examService.getStudentReportCard(req.tenant.id, studentId, examId);
+    return {
+      success: true,
+      data,
+      message: 'Student term report card generated.',
+    };
+  }
+
   @Get(':id')
   @RequirePermissions('exams:read')
   @ApiOperation({ summary: 'Get exam schedule details with paper listings' })
@@ -93,44 +155,52 @@ export class ExamController {
     return {
       success: true,
       data,
-      message: 'Exam test paper created successfully.',
+      message: 'Exam paper configured successfully.',
     };
   }
 
-  @Get('papers/list')
+  @Get('papers/subject/:subjectId')
   @RequirePermissions('exams:read')
-  @ApiOperation({ summary: 'List all exam test papers' })
-  @ApiQuery({ name: 'examId', required: false })
-  @ApiQuery({ name: 'batchId', required: false })
-  async findPapers(
-    @Req() req: any,
-    @Query('examId') examId?: string,
-    @Query('batchId') batchId?: string
-  ) {
-    const data = await this.examService.findPapers(req.tenant.id, examId, batchId);
+  @ApiOperation({ summary: 'Get all papers for a subject' })
+  @ApiParam({ name: 'subjectId', description: 'Subject UUID' })
+  async findPapersBySubject(@Req() req: any, @Param('subjectId') subjectId: string) {
+    const data = await this.examService.findPapersBySubject(req.tenant.id, subjectId);
     return {
       success: true,
       data,
-      message: 'Exam papers fetched successfully.',
+      message: 'Subject exam papers retrieved successfully.',
+    };
+  }
+
+  @Get('papers/batch/:batchId')
+  @RequirePermissions('exams:read')
+  @ApiOperation({ summary: 'Get all papers scheduled for a batch' })
+  @ApiParam({ name: 'batchId', description: 'Batch UUID' })
+  async findPapersByBatch(@Req() req: any, @Param('batchId') batchId: string) {
+    const data = await this.examService.findPapersByBatch(req.tenant.id, batchId);
+    return {
+      success: true,
+      data,
+      message: 'Batch exam papers retrieved successfully.',
     };
   }
 
   @Get('papers/:id')
   @RequirePermissions('exams:read')
-  @ApiOperation({ summary: 'Get details of specific exam paper' })
+  @ApiOperation({ summary: 'Get specific paper metadata and enrolled candidate marksheets' })
   @ApiParam({ name: 'id', description: 'Exam Paper UUID' })
   async findOnePaper(@Req() req: any, @Param('id') id: string) {
     const data = await this.examService.findOnePaper(req.tenant.id, id);
     return {
       success: true,
       data,
-      message: 'Exam paper details retrieved successfully.',
+      message: 'Exam paper details retrieved.',
     };
   }
 
   @Delete('papers/:id')
   @RequirePermissions('exams:delete')
-  @ApiOperation({ summary: 'Delete exam paper' })
+  @ApiOperation({ summary: 'Delete an exam paper' })
   @ApiParam({ name: 'id', description: 'Exam Paper UUID' })
   async removePaper(@Req() req: any, @Param('id') id: string) {
     const data = await this.examService.removePaper(req.tenant.id, id);
@@ -142,10 +212,10 @@ export class ExamController {
   }
 
   // ==========================================
-  // MARKS ENTRY & GRADE REPORTS ENDPOINTS
+  // MARKS RECORDING & TRANSCRIPTS
   // ==========================================
 
-  @Post('marks/bulk')
+  @Post('marks')
   @HttpCode(HttpStatus.OK)
   @RequirePermissions('exams:create')
   @ApiOperation({ summary: 'Record student exam marks entry (Teacher/Admin only)' })
@@ -168,24 +238,6 @@ export class ExamController {
       success: true,
       data,
       message: 'Exam student ranks fetched successfully.',
-    };
-  }
-
-  @Get('reports/student/:studentId')
-  @RequirePermissions('exams:read')
-  @ApiOperation({ summary: 'Generate student academic term report card transcript' })
-  @ApiParam({ name: 'studentId', description: 'Student UUID' })
-  @ApiQuery({ name: 'examId', required: true, description: 'Exam container UUID' })
-  async getStudentReportCard(
-    @Req() req: any,
-    @Param('studentId') studentId: string,
-    @Query('examId') examId: string
-  ) {
-    const data = await this.examService.getStudentReportCard(req.tenant.id, studentId, examId);
-    return {
-      success: true,
-      data,
-      message: 'Student term report card generated.',
     };
   }
 }

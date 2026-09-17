@@ -9,16 +9,16 @@ import { useToast } from '@/providers/ToastProvider';
 export default function TestimonialsPage() {
   const { toast } = useToast();
   const testimonials = [
-    { id: '1', author: 'Priya Sharma (Parent)', text: 'Hyvora Academy provided exceptional coaching for my daughter in NEET preparation.', rating: 5 },
-    { id: '2', author: 'Rahul Verma (Alumni - JEE Air 142)', text: 'The structured test series and subject-wise analytics were crucial to my rank.', rating: 5 }
+    { id: '1', author: 'Dr. Ramesh Sharma (Parent of Arjun, B.Tech CSE)', text: 'Hyvora Institute of Technology provides outstanding engineering curriculum, advanced AI labs, and high-quality faculty mentorship.', rating: 5 },
+    { id: '2', author: 'Pooja Hegde (Alumni - B.Tech CSE, SDE at Google)', text: 'The academic rigor, semester project labs, and campus placement training prepared me thoroughly for top-tier software engineering roles.', rating: 5 }
   ];
 
   return (
     <div className="space-y-6 animate-fade-in select-none">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Student & Parent Testimonials</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Reviews and success stories displayed on academy website.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Student & Alumni Testimonials</h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">Reviews and graduate success stories displayed on the college website.</p>
         </div>
         <Button onClick={() => toast('New Review', 'Add new testimonial modal opened.', 'info')} className="gap-2 h-10">
           <Plus className="w-4 h-4" /> Add Testimonial

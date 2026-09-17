@@ -407,19 +407,53 @@ export class TeacherService {
 
   async getTimetable(academyId: string, teacherId: string) {
     try {
-      // Direct raw query timetable selection from class_schedules table
-      const schedules = await this.prisma.$queryRaw`
-        SELECT day_of_week, start_time, end_time, subject_id, room 
-        FROM class_schedules 
-        WHERE teacher_id = ${teacherId}::uuid AND academy_id = ${academyId}::uuid AND deleted_at IS NULL
-      `;
-      return schedules;
+      const timetableEntries = await this.prisma.timetableSchedule.findMany({
+        where: { teacherId, academyId, deletedAt: null },
+        include: {
+          subject: true,
+          batch: true,
+          department: true,
+        },
+        orderBy: [
+          { dayOfWeek: 'asc' },
+          { startTime: 'asc' },
+        ],
+      });
+
+      if (timetableEntries.length > 0) {
+        return timetableEntries.map(t => ({
+          id: t.id,
+          dayOfWeek: t.dayOfWeek,
+          startTime: t.startTime,
+          endTime: t.endTime,
+          subject: t.subject?.name || 'Subject',
+          subjectCode: t.subject?.code || '',
+          room: t.roomNumber || 'Room',
+          batch: t.batch?.name || '',
+          department: t.department?.name || '',
+        }));
+      }
+
+      const classSchedules = await this.prisma.classSchedule.findMany({
+        where: { teacherId, academyId, deletedAt: null },
+        include: {
+          subject: true,
+          batch: true,
+        },
+      });
+
+      return classSchedules.map(c => ({
+        id: c.id,
+        dayOfWeek: c.dayOfWeek,
+        startTime: c.startTime,
+        endTime: c.endTime,
+        subject: c.subject?.name || 'Subject',
+        subjectCode: c.subject?.code || '',
+        room: c.room || 'Classroom',
+        batch: c.batch?.name || '',
+      }));
     } catch (err) {
-      // Return fallback demo schedules structure
-      return [
-        { dayOfWeek: 'Monday', startTime: '09:00', endTime: '10:00', subject: 'Algebra-I', room: 'Classroom-4' },
-        { dayOfWeek: 'Wednesday', startTime: '11:00', endTime: '12:00', subject: 'Calculus-II', room: 'Lab-A' },
-      ];
+      return [];
     }
   }
 

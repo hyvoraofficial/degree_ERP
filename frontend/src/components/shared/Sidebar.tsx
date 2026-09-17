@@ -24,10 +24,10 @@ export function Sidebar({ onClose, isMobileDrawer = false }: SidebarProps = {}) 
   const menuItems = role ? NAVIGATION_ITEMS[role] || [] : [];
 
   const getPortalLabel = () => {
-    if (role === 'TEACHER' || pathname?.startsWith('/teacher')) return 'Teacher Portal';
+    if (role === 'TEACHER' || pathname?.startsWith('/teacher')) return 'Faculty Portal';
     if (role === 'STUDENT' || pathname?.startsWith('/student')) return 'Student Portal';
     if (role === 'SUPER_ADMIN' || pathname?.startsWith('/super-admin')) return 'Super Admin Portal';
-    return 'Admin Portal';
+    return 'College Admin Portal';
   };
   
   const handleLogout = async () => {

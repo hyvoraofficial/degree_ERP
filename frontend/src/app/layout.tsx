@@ -8,8 +8,8 @@ import { ToastProvider } from '@/providers/ToastProvider';
 import { BranchProvider } from '@/providers/BranchProvider';
 
 export const metadata: Metadata = {
-  title: 'HYVORA EduERP - SaaS Educational Platform',
-  description: 'Enterprise grade educational management resource planning system.',
+  title: 'HYVORA EduERP - Degree College Management System',
+  description: 'Enterprise Degree College Management & Academic ERP System for Engineering & Higher Education Institutions.',
   icons: {
     icon: [
       { url: '/favicon.ico' },

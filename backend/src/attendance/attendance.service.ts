@@ -83,17 +83,18 @@ export class AttendanceService {
   }
 
   async getStudentAttendanceReport(academyId: string, batchId: string, date: string, subjectId?: string) {
+    const where: any = {
+      academyId,
+      batchId,
+      date: new Date(date),
+      deletedAt: null,
+    };
+    if (subjectId) where.subjectId = subjectId;
+
     const attendance = await this.prisma.attendance.findFirst({
-      where: {
-        academyId,
-        batchId,
-        date: new Date(date),
-        subjectId: subjectId || null,
-        deletedAt: null,
-      },
+      where,
       include: {
         records: {
-          where: { deletedAt: null },
           include: {
             student: {
               include: { user: true },
@@ -107,8 +108,8 @@ export class AttendanceService {
 
     return attendance.records.map((r: any) => ({
       studentId: r.studentId,
-      firstName: r.student.user.firstName,
-      lastName: r.student.user.lastName,
+      firstName: r.student.user?.firstName || '',
+      lastName: r.student.user?.lastName || '',
       admissionNumber: r.student.admissionNumber,
       status: r.status,
       remarks: r.remarks,
@@ -121,10 +122,10 @@ export class AttendanceService {
 
     const records = await this.prisma.attendanceRecord.findMany({
       where: {
-        academyId,
         studentId,
-        deletedAt: null,
         attendance: {
+          academyId,
+          deletedAt: null,
           date: {
             gte: startDate,
             lte: endDate,
@@ -187,10 +188,9 @@ export class AttendanceService {
       subjects.map(async (subj: any) => {
         const records = await this.prisma.attendanceRecord.findMany({
           where: {
-            academyId,
             studentId,
-            deletedAt: null,
             attendance: {
+              academyId,
               subjectId: subj.id,
               deletedAt: null,
             },
@@ -218,9 +218,7 @@ export class AttendanceService {
 
     const overallPercentage = totalSessionsSum > 0
       ? parseFloat(((totalPresentSum / totalSessionsSum) * 100).toFixed(1))
-      : subjectStats.length > 0
-        ? parseFloat((subjectStats.reduce((acc, curr) => acc + curr.percentage, 0) / subjectStats.length).toFixed(1))
-        : 100;
+      : 100;
 
     return {
       studentId,
@@ -340,7 +338,7 @@ export class AttendanceService {
     const attendances = await this.prisma.attendance.findMany({
       where: whereClause,
       include: {
-        records: { where: { deletedAt: null } },
+        records: true,
       },
       orderBy: { date: 'asc' },
       take: 30, // Last 30 sessions

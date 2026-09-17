@@ -47,6 +47,11 @@ export const teacherService = {
     return rawList;
   },
 
+  findAll: async (search?: string, branchId?: string, page = 1, limit = 100): Promise<{ teachers: Teacher[]; meta: { total: number } }> => {
+    const teachers = await teacherService.getTeachers(search);
+    return { teachers, meta: { total: teachers.length } };
+  },
+
   getTeacherById: async (id: string): Promise<Teacher> => {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/teachers/${id}`, {

@@ -244,7 +244,7 @@ export default function StudentDashboard() {
             Welcome back, {student.firstName}!
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-bold mt-0.5">
-            Admission Code: {student.admissionNumber} • Course: {student.course?.name || 'NEET Medical'}
+            Admission Code: {student.admissionNumber} • Program: {student.course?.name || 'B.Tech Computer Science'}
           </p>
         </div>
         <Button variant="secondary" onClick={fetchStudentData} className="h-10 gap-1.5 shrink-0 font-bold cursor-pointer">
@@ -286,15 +286,15 @@ export default function StudentDashboard() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard
-              title="Course Track"
-              value={student.course?.name || 'JEE Advanced'}
-              description={student.course?.code || 'JEE2027'}
+              title="Program"
+              value={student.course?.name || 'B.Tech CSE'}
+              description={student.course?.code || 'BTECH-CSE'}
               icon={<BookOpen className="w-5 h-5 text-indigo-600" />}
             />
             <StatsCard
-              title="Class Batch"
-              value={student.batch?.name || 'Batch A'}
-              description={student.batch?.code || 'EC-JEE-A'}
+              title="Section / Batch"
+              value={student.batch?.name || 'CSE - Section A'}
+              description={student.batch?.code || 'CSE-2026-A'}
               icon={<Layers className="w-5 h-5 text-indigo-600" />}
             />
             <StatsCard
@@ -379,8 +379,8 @@ export default function StudentDashboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-xs font-semibold bg-white p-4 rounded-xl border border-slate-200">
-            <div className="text-slate-600">Course Name: <span className="text-slate-900 font-extrabold block mt-0.5">{student.course?.name || 'JEE Advanced'}</span></div>
-            <div className="text-zinc-500">Course Code: <span className="text-slate-900 font-extrabold block mt-0.5">{student.course?.code || 'JEE2027'}</span></div>
+            <div className="text-slate-600">Program Name: <span className="text-slate-900 font-extrabold block mt-0.5">{student.course?.name || 'B.Tech Computer Science & Engineering'}</span></div>
+            <div className="text-zinc-500">Program Code: <span className="text-slate-900 font-extrabold block mt-0.5">{student.course?.code || 'BTECH-CSE'}</span></div>
           </div>
         </Card>
       )}
@@ -389,13 +389,13 @@ export default function StudentDashboard() {
       {activeTab === 'BATCH' && (
         <Card className="space-y-4 border border-slate-200 bg-white shadow-xs">
           <div>
-            <h3 className="text-base font-extrabold text-slate-900">Class Batch Details</h3>
-            <p className="text-xs text-slate-600 font-medium mt-0.5">Your operational study session grouping details.</p>
+            <h3 className="text-base font-extrabold text-slate-900">Academic Batch & Section Details</h3>
+            <p className="text-xs text-slate-600 font-medium mt-0.5">Your semester section and cohort grouping.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-xs font-semibold bg-white p-4 rounded-xl border border-slate-200">
-            <div className="text-slate-600">Batch Name: <span className="text-slate-900 font-extrabold block mt-0.5">{student.batch?.name || '2026 Batch A'}</span></div>
-            <div className="text-slate-600">Batch Code: <span className="text-slate-900 font-extrabold block mt-0.5">{student.batch?.code || 'JEE26A'}</span></div>
+            <div className="text-slate-600">Batch Name: <span className="text-slate-900 font-extrabold block mt-0.5">{student.batch?.name || '2026-2030 B.Tech CSE - Section A'}</span></div>
+            <div className="text-slate-600">Batch Code: <span className="text-slate-900 font-extrabold block mt-0.5">{student.batch?.code || 'CSE-2026-A'}</span></div>
           </div>
         </Card>
       )}
@@ -677,11 +677,11 @@ export default function StudentDashboard() {
           <div className="space-y-4">
             <div className="p-4 bg-zinc-50 dark:bg-zinc-900/60 border border-border rounded-2xl space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-primary">JEE Mock Test Schedule</span>
+                <span className="text-xs font-bold text-primary">Semester End Examination Schedule</span>
                 <span className="text-[10px] text-zinc-400">2 hours ago</span>
               </div>
               <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                The monthly JEE preparatory mock test is scheduled for next Saturday. Reporting time is 09:00 AM sharp at the Electronic City branch.
+                The Semester End Examination timetable and hall ticket verification will commence from next Monday. Please ensure all library book returns and fee statements are settled.
               </p>
             </div>
           </div>

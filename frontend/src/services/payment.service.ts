@@ -1,22 +1,56 @@
-import { 
-  MOCK_FEE_STRUCTURES, 
-  MOCK_FEE_ALLOCATIONS, 
-  MOCK_PAYMENTS, 
-  MOCK_PAYMENT_TRANSACTIONS 
-} from '@/lib/mockData';
+import { API_BASE_URL, getAuthToken, getSubdomain } from '@/config/api.config';
 import { FeeStructure, FeeAllocation, PaymentLedgerEntry, PaymentTransaction } from '@/types/payment';
 
 export const paymentService = {
   getFeeStructures: async (): Promise<FeeStructure[]> => {
-    return Promise.resolve(MOCK_FEE_STRUCTURES);
+    const token = getAuthToken();
+    const res = await fetch(`${API_BASE_URL}/finance/structures`, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'X-Academy-Subdomain': getSubdomain(),
+      },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
   },
+
   getFeeAllocations: async (): Promise<FeeAllocation[]> => {
-    return Promise.resolve(MOCK_FEE_ALLOCATIONS);
+    const token = getAuthToken();
+    const res = await fetch(`${API_BASE_URL}/finance/allocations`, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'X-Academy-Subdomain': getSubdomain(),
+      },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
   },
+
   getPaymentsLedger: async (): Promise<PaymentLedgerEntry[]> => {
-    return Promise.resolve(MOCK_PAYMENTS);
+    const token = getAuthToken();
+    const res = await fetch(`${API_BASE_URL}/finance/payments`, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'X-Academy-Subdomain': getSubdomain(),
+      },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
   },
+
   getTransactions: async (): Promise<PaymentTransaction[]> => {
-    return Promise.resolve(MOCK_PAYMENT_TRANSACTIONS);
+    const token = getAuthToken();
+    const res = await fetch(`${API_BASE_URL}/finance/payments`, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'X-Academy-Subdomain': getSubdomain(),
+      },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
   },
 };
