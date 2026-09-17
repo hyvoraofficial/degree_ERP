@@ -1,27 +1,30 @@
+name: hyvora-degree
+
 # ==========================================
-# HYVORA EduERP - Production Docker Compose
-# Architecture: Next.js Frontend + NestJS Backend -> Supabase PostgreSQL & Storage
+# HYVORA Degree College EduERP - Production Docker Compose
+# Architecture: Next.js Frontend + NestJS Backend -> Dedicated Supabase PostgreSQL & Storage
+# Coexists cleanly with Academy EduERP (ports 3001/3002 vs 3003/3004)
 # ==========================================
 
 services:
   # ----------------------------------------
-  # NestJS Backend API Service
+  # Degree College NestJS Backend API Service
   # ----------------------------------------
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: hyvora-backend
+    container_name: hyvora-degree-backend
     restart: unless-stopped
     env_file:
       - ./backend/.env
     environment:
       - NODE_ENV=production
       - PORT=3002
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,https://hyvorademo.in,https://*.hyvora.in
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3003,https://degree.hyvora.in,https://*.degree.hyvora.in,https://*.hyvora.in
       - ENABLE_SWAGGER=true
     ports:
-      - "3002:3002"
+      - "3004:3002"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/api/v1/health || exit 1"]
       interval: 15s
@@ -29,25 +32,25 @@ services:
       retries: 5
       start_period: 20s
     networks:
-      - hyvora-network
+      - hyvora-degree-network
 
   # ----------------------------------------
-  # Next.js Frontend Web Application Service
+  # Degree College Next.js Frontend Web Application Service
   # ----------------------------------------
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:3002/api/v1
-    container_name: hyvora-frontend
+        NEXT_PUBLIC_API_URL: http://localhost:3004/api/v1
+    container_name: hyvora-degree-frontend
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - NEXT_PUBLIC_API_URL=http://localhost:3002/api/v1
+      - NEXT_PUBLIC_API_URL=http://localhost:3004/api/v1
     ports:
-      - "3001:3001"
+      - "3003:3001"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/ || exit 1"]
       interval: 15s
@@ -58,11 +61,12 @@ services:
       backend:
         condition: service_healthy
     networks:
-      - hyvora-network
+      - hyvora-degree-network
 
 # ----------------------------------------
-# Isolated Application Network Bridge
+# Isolated Degree College Application Network Bridge
 # ----------------------------------------
 networks:
-  hyvora-network:
+  hyvora-degree-network:
     driver: bridge
+

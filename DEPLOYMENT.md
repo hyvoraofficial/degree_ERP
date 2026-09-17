@@ -1,219 +1,161 @@
-# Production Deployment Guide: HYVORA EduERP
+# Production Deployment Guide: HYVORA Degree College EduERP
 
-This guide provides complete, production-grade instructions for deploying the **HYVORA EduERP** multi-tenant educational ERP system.
-
----
-
-## 1. System Requirements & Architecture
-
-HYVORA EduERP is built using a modern decoupled architecture:
-- **Backend**: NestJS (TypeScript, Node.js v20+) with Prisma ORM.
-- **Frontend**: Next.js 16 (App Router, Turbopack, React 19).
-- **Database**: PostgreSQL 15+ with multi-tenant schema isolation.
-- **Process Manager**: PM2 or Docker / Docker Compose.
-- **Reverse Proxy / SSL**: Nginx with Let's Encrypt Certbot.
+This guide provides the complete, production-grade instructions for deploying the **HYVORA Degree College EduERP** multi-tenant educational ERP system using Docker Compose, dedicated Supabase PostgreSQL, and Nginx reverse proxy with SSL.
 
 ---
 
-## 2. Environment Variables Matrix
+## 1. System Architecture & Dual-Product Port Isolation
 
-### Root / Infrastructure (`.env`)
+The HYVORA platform operates two distinct, independently deployable SaaS products. They can run on separate cloud servers or coexist cleanly on the same physical host without port, network, or database collision.
 
-| Variable Name | Required | Default / Example | Purpose |
-|---|---|---|---|
-| `NODE_ENV` | Yes | `production` | Specifies deployment environment. |
-| `PORT` | Yes | `3002` | Port on which the NestJS backend listens. |
-| `DATABASE_URL` | Yes | `postgresql://user:pass@localhost:5432/hyvora_eduerp` | PostgreSQL production connection string. |
-| `JWT_SECRET` | Yes | `<secure_64_char_random_string>` | Secret key used for signing JWT auth tokens. |
-| `CORS_ORIGINS` | Yes | `https://app.hyvora.io,https://*.hyvora.io` | Comma-separated allowed frontend origins. |
-| `STORAGE_BUCKET_URL` | Yes | `https://storage.hyvora.io` | S3 / Supabase object storage endpoint. |
+| Component | Product 1: Academy EduERP (JEE/NEET) | Product 2: Degree College EduERP |
+|---|---|---|
+| **Compose Project Name** | `hyvora-academy` (or legacy default) | `hyvora-degree` |
+| **Frontend Container** | `hyvora-frontend` | `hyvora-degree-frontend` |
+| **Backend Container** | `hyvora-backend` | `hyvora-degree-backend` |
+| **Docker Network** | `hyvora-network` | `hyvora-degree-network` |
+| **Frontend Host Port** | `3001` | `3003` |
+| **Backend Host Port** | `3002` | `3004` |
+| **Database** | Supabase Project A (`hyvora_eduerp`) | Dedicated Supabase Project B (`eduERP_degree`) |
+| **Object Storage** | `hyvora-academy-storage` | `hyvora-degree-storage` |
+| **Production Web Domain** | `eduerp.hyvora.in` / `*.hyvora.in` | `degree.hyvora.in` / `*.degree.hyvora.in` |
+| **Production API Domain** | `api.eduerp.hyvora.in` | `api.degree.hyvora.in` |
+
+---
+
+## 2. Environment Variables Specification
 
 ### Backend Service (`backend/.env`)
+
+Create `backend/.env` with your dedicated Degree College production credentials:
 
 ```env
 NODE_ENV=production
 PORT=3002
-DATABASE_URL=postgresql://db_user:db_password@localhost:5432/hyvora_eduerp?schema=public&connection_limit=20
-JWT_SECRET=super_secret_production_jwt_signing_key_hyvora
-CORS_ORIGINS=https://app.hyvora.io,https://*.hyvora.io,http://localhost:3000,http://localhost:3001
-STORAGE_BUCKET_URL=https://storage.hyvora.io
-STORAGE_BUCKET_NAME=hyvora-erp-storage
-ENABLE_SWAGGER=false
+
+# Supabase PostgreSQL Connection Strings (Dedicated Degree College Supabase Instance)
+DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[DB_PASSWORD]@[POOLER_HOST]:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[PROJECT_REF]:[DB_PASSWORD]@[POOLER_HOST]:5432/postgres"
+
+# Supabase API Credentials & Storage
+SUPABASE_URL="https://[PROJECT_REF].supabase.co"
+SUPABASE_ANON_KEY="[ANON_KEY]"
+SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
+
+# Security & CORS
+JWT_SECRET="[SECURE_64_CHARACTER_RANDOM_JWT_SECRET]"
+CORS_ORIGINS="http://localhost:3003,https://degree.hyvora.in,https://*.degree.hyvora.in,https://*.hyvora.in"
+ENABLE_SWAGGER=true
 ```
 
 ### Frontend Service (`frontend/.env.local`)
 
-
 ```env
-NEXT_PUBLIC_API_URL=https://api.hyvora.io/api/v1
+# Degree College API Gateway
+NEXT_PUBLIC_API_URL=https://api.degree.hyvora.in/api/v1
+NEXT_PUBLIC_APP_DOMAIN=degree.hyvora.in
+
+# Supabase Client Credentials (Public Anon Key only)
+NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_REF].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[ANON_KEY]
 ```
 
 ---
 
-## 3. Database Setup & Prisma Migrations
+## 3. Production Database Migration Flow
 
-1. Ensure PostgreSQL service is running and database exists:
-   ```bash
-   createdb hyvora_eduerp
-   ```
+Follow this exact sequence for applying database migrations safely without data loss:
 
-2. Run production schema sync and client generation:
-   ```bash
-   cd backend
-   npx prisma generate
-   npx prisma db push --accept-data-loss
-   ```
+### Step 1: Verify Environment
+Ensure `DATABASE_URL` and `DIRECT_URL` in `backend/.env` point exclusively to the dedicated Degree College Supabase database.
 
-3. Seed Initial Demo Tenant Data (Optional):
-   ```bash
-   psql -d hyvora_eduerp -f ../database/seeds/01_hyvora_academy_seed.sql
-   ```
-
----
-
-## 4. Building for Production
-
-### Backend (NestJS)
-
+### Step 2: Apply Prisma Migrations
+Run Prisma's official production migration command:
 ```bash
 cd backend
-npm ci
-npm run build
+npx prisma migrate deploy
 ```
-This generates the optimized JavaScript bundle inside `backend/dist/`.
+> [!IMPORTANT]
+> Always use `npx prisma migrate deploy` in production. Do NOT use `npx prisma db push` or `prisma migrate reset` in production, as those can drop existing schemas or cause data loss.
 
-### Frontend (Next.js)
-
+### Step 3: Run Seed Data (Explicit & Idempotent)
+Populate initial academic entities (HITM institution, departments, degree programs, semesters, faculty, students, timetables, UGC grading scales, fees, placements, etc.):
 ```bash
-cd frontend
-npm ci
-npm run build
+npm run seed
 ```
-This generates the optimized Next.js production build inside `frontend/.next/`.
+> [!NOTE]
+> The seed script is completely idempotent. It uses upserts and unique code identifiers so running it multiple times will not create duplicate records.
 
 ---
 
-## 5. Production Process Management (PM2)
+## 4. Docker Deployment Workflow
 
-Create an `ecosystem.config.js` file in the root directory:
-
-```javascript
-module.exports = {
-  apps: [
-    {
-      name: 'hyvora-backend',
-      cwd: './backend',
-      script: 'dist/src/main.js',
-      instances: 'max',
-      exec_mode: 'cluster',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3002
-      }
-    },
-    {
-      name: 'hyvora-frontend',
-      cwd: './frontend',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3001',
-      instances: 2,
-      exec_mode: 'cluster',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3001
-      }
-    }
-  ]
-};
-```
-
-Start applications with PM2:
+### Step 1: Build Docker Images
+Build both backend and frontend images under the `hyvora-degree` project namespace:
 ```bash
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup
+docker compose -p hyvora-degree build --no-cache
 ```
+
+### Step 2: Start Services in Background
+```bash
+docker compose -p hyvora-degree up -d
+```
+
+### Step 3: Verify Container Health
+```bash
+docker compose -p hyvora-degree ps
+```
+
+Expected output:
+```
+NAME                     COMMAND                  SERVICE    STATUS              PORTS
+hyvora-degree-backend    "node dist/src/main.…"   backend    running (healthy)   0.0.0.0:3004->3002/tcp
+hyvora-degree-frontend   "node server.js"         frontend   running (healthy)   0.0.0.0:3003->3001/tcp
+```
+
+### Step 4: Validate Health Endpoints
+- **Backend API Health**:
+  ```bash
+  curl http://localhost:3004/api/v1/health
+  # Response: {"status":"up","database":"connected","timestamp":"..."}
+  ```
+- **Frontend HTTP Check**:
+  ```bash
+  curl -I http://localhost:3003/
+  # Response: HTTP/1.1 200 OK
+  ```
 
 ---
 
-## 6. Docker Deployment (Optional)
+## 5. Nginx Reverse Proxy & SSL Configuration
 
-### `docker-compose.yml`
+Below is the production Nginx reverse proxy configuration for routing traffic from `degree.hyvora.in` and `api.degree.hyvora.in` to the Degree College Docker containers.
 
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: hyvora-postgres
-    restart: always
-    environment:
-      POSTGRES_DB: hyvora_eduerp
-      POSTGRES_USER: hyvora_user
-      POSTGRES_PASSWORD: secure_db_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: hyvora-backend
-    restart: always
-    environment:
-      NODE_ENV: production
-      PORT: 3002
-      DATABASE_URL: postgresql://hyvora_user:secure_db_password@postgres:5432/hyvora_eduerp
-      JWT_SECRET: super_secret_production_jwt_signing_key_hyvora
-      CORS_ORIGINS: https://*.hyvora.io,https://app.hyvora.io
-    ports:
-      - "3002:3002"
-    depends_on:
-      - postgres
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: hyvora-frontend
-    restart: always
-    environment:
-      NEXT_PUBLIC_API_URL: https://api.hyvora.io/api/v1
-    ports:
-      - "3001:3001"
-    depends_on:
-      - backend
-
-volumes:
-  postgres_data:
-```
-
----
-
-## 7. Nginx Reverse Proxy Setup & Wildcard Subdomain SSL
-
-Below is a production Nginx server block supporting multi-tenant subdomains (`demo.hyvora.io`, `app.hyvora.io`):
+Create `/etc/nginx/sites-available/degree.hyvora.in`:
 
 ```nginx
-# API Backend Proxy
+# ==========================================
+# 1. Degree College API Gateway (api.degree.hyvora.in) -> Host Port 3004
+# ==========================================
 server {
     listen 80;
-    server_name api.hyvora.io;
+    server_name api.degree.hyvora.in;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name api.hyvora.io;
+    server_name api.degree.hyvora.in;
 
-    ssl_certificate /etc/letsencrypt/live/hyvora.io/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/hyvora.io/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/degree.hyvora.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/degree.hyvora.in/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    client_max_body_size 50M;
 
     location / {
-        proxy_pass http://127.0.0.1:3002;
+        proxy_pass http://127.0.0.1:3004;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -221,25 +163,31 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 90s;
     }
 }
 
-# Frontend Application Proxy (Multi-Tenant Wildcard Subdomains)
+# ==========================================
+# 2. Degree College Frontend Application (degree.hyvora.in / *.degree.hyvora.in) -> Host Port 3003
+# ==========================================
 server {
     listen 80;
-    server_name *.hyvora.io hyvora.io;
+    server_name degree.hyvora.in *.degree.hyvora.in;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name *.hyvora.io hyvora.io;
+    server_name degree.hyvora.in *.degree.hyvora.in;
 
-    ssl_certificate /etc/letsencrypt/live/hyvora.io/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/hyvora.io/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/degree.hyvora.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/degree.hyvora.in/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     location / {
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://127.0.0.1:3003;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -247,18 +195,32 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
     }
 }
 ```
 
+Enable the site and reload Nginx:
+```bash
+sudo ln -s /etc/nginx/sites-available/degree.hyvora.in /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Obtain Let's Encrypt SSL Certificates:
+```bash
+sudo certbot --nginx -d degree.hyvora.in -d "*.degree.hyvora.in" -d api.degree.hyvora.in
+```
+
 ---
 
-## 8. Verification Checklist
+## 6. Zero-Downtime Maintenance & Commands
 
-Before opening the platform for client testing:
-- [x] Production builds pass with zero errors (`npm run build` in backend and frontend).
-- [x] Environment variables verified across backend and frontend.
-- [x] CORS origin validation enabled for tenant subdomains.
-- [x] Database migration applied cleanly (`npx prisma db push`).
-- [x] API URL configured dynamically via `NEXT_PUBLIC_API_URL`.
-- [x] Security headers (`X-Frame-Options`, `HSTS`, `X-Content-Type-Options`) active on frontend & backend.
+| Task | Command |
+|---|---|
+| **View Logs (Both Services)** | `docker compose -p hyvora-degree logs -f` |
+| **View Backend Logs** | `docker compose -p hyvora-degree logs -f backend` |
+| **View Frontend Logs** | `docker compose -p hyvora-degree logs -f frontend` |
+| **Restart Degree Services** | `docker compose -p hyvora-degree restart` |
+| **Stop Degree Services** | `docker compose -p hyvora-degree down` |
+| **Update / Rebuild** | `docker compose -p hyvora-degree up -d --build` |

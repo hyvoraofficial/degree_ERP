@@ -38,12 +38,19 @@ async function bootstrap() {
     : [];
 
   const defaultAllowedOrigins = [
+    'https://degree.hyvorademo.in',
+    'https://degree.hyvora.in',
+    'https://api.degree.hyvora.in',
     'https://eduerp.hyvorademo.in',
+    'http://localhost:3003',
+    'http://localhost:3004',
     'http://localhost:3001',
     'http://localhost:3000',
     'http://localhost:3002',
     '*.hyvorademo.in',
     'hyvorademo.in',
+    '*.hyvora.in',
+    'hyvora.in',
     '*.hyvora.io',
     'hyvora.io',
     '*.vercel.app',
@@ -95,9 +102,9 @@ async function bootstrap() {
   const enableSwagger = process.env.ENABLE_SWAGGER === 'true' || !isProduction;
   if (enableSwagger) {
     const config = new DocumentBuilder()
-      .setTitle('HYVORA EduERP API')
+      .setTitle('HYVORA Degree College EduERP API')
       .setDescription(
-        'Enterprise REST API documentation for HYVORA EduERP multi-tenant ERP database portals.'
+        'Enterprise REST API documentation for HYVORA Degree College EduERP multi-tenant ERP database portals.'
       )
       .setVersion('1.0')
       .addBearerAuth()
