@@ -11,8 +11,10 @@ async function bootstrap() {
   // Enable graceful shutdown signals
   app.enableShutdownHooks();
 
-  // Set global API version prefix
-  app.setGlobalPrefix('api/v1');
+  // Set global API version prefix (exclude root / for landing/health check)
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/'],
+  });
 
   // Bind global exception formatting filter
   app.useGlobalFilters(new HttpExceptionFilter());
